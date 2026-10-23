@@ -1,0 +1,15 @@
+# Documentation only. Keep the working profile and all grants outside Git.
+[mcp_servers.second_brain_selected]
+command = "OWNER_CONFIG_ONLY/python.exe"
+args = ["-B", "OWNER_CONFIG_ONLY/scripts/selected_memory_mcp.py"]
+enabled = false
+required = true
+enabled_tools = ["search_selected_memory", "read_selected_memory"]
+startup_timeout_sec = 20
+tool_timeout_sec = 30
+[mcp_servers.second_brain_selected.env]
+SECOND_BRAIN_GRANT = "OWNER_CONFIG_ONLY/selected-grant.json"
+SECOND_BRAIN_GRANT_SHA256 = "REPLACE_WITH_REVIEWED_GRANT_SHA256"
+SECOND_BRAIN_CLIENT = "codex-openai"
+PYTHONDONTWRITEBYTECODE = "1"
+PYTHONIOENCODING = "utf-8"

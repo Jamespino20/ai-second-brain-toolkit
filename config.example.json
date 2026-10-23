@@ -1,0 +1,9 @@
+{
+  "canonical_vault": "OWNER_CONFIG_ONLY_OUTSIDE_THIS_REPOSITORY",
+  "private_workspace": "OWNER_CONFIG_ONLY_OUTSIDE_THIS_REPOSITORY",
+  "live_publication": false,
+  "external_processing": false,
+  "automatic_capture": false,
+  "graphify": {"enabled": false, "scope": "synthetic-or-authorized-code-only"},
+  "agent_input": "explicitly selected context packet only"
+}

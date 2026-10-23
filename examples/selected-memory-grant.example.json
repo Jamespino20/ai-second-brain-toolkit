@@ -1,0 +1,12 @@
+{
+  "schema": "selected-memory-readonly-v1",
+  "source_kind": "synthetic",
+  "client": "codex-openai",
+  "root": "OWNER_CONFIG_ONLY/test-vault",
+  "owner_authorization": {
+    "state": "pending",
+    "reference": "REQUIRES_ACTUAL_OWNER_AUTHORIZATION",
+    "personal_content_external_model_approved": false
+  },
+  "notes": []
+}
