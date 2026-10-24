@@ -13,6 +13,7 @@ examples and attributed format skills; personal notes and histories stay outside
 | Canonical/live retrieval | Implemented mode tested with synthetic files only. Personal-note model access still requires exact per-file, per-provider owner consent. |
 | Legacy four-note preview reader | Operational locally for its historical unpublished-preview format; not the current canonical-note integration. |
 | Explicit importer / rollout capture | Local parsing, byte archives, branch/date provenance and disposable drafts tested. No watcher or automatic session capture. |
+| Opt-in CLI outcome capture | Fresh synthetic `codex exec` runs stage source-linked proposals automatically; repeat/replay, failures and disable tested. Desktop/native hooks remain inactive and untested. See [capture MVP](docs/automatic-capture-mvp.md). |
 | Full ChatGPT history import | Parser exists; complete account import remains pending the official export and coverage review. |
 | Backup helper | Synthetic snapshot/restore tested; no independent cloud or account-level recovery guarantee. |
 | Graphify | Optional experimental code intelligence; pinned 0.9.92 AST-only synthetic demo. No personal-document indexing. |
@@ -73,7 +74,7 @@ References: [Obsidian Skills](https://github.com/kepano/obsidian-skills),
 Pinned provenance, retained licenses and the distinction between reference and copied
 material are listed in [THIRD_PARTY.md](THIRD_PARTY.md).
 
-No publisher, automatic capture, external processing, GitHub upload or live-vault
+No publisher, background capture, external processing, GitHub upload or live-vault
 write is activated by setup. Keep raw conversations, backups, credentials and runtime
 outputs outside Git even for private repositories. See the
 [publication procedure](docs/github-publication.md) before any first commit or push.

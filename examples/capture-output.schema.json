@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["1.0"]},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {"type": "string", "enum": ["outcome", "decision", "lesson", "milestone"]},
+          "text": {"type": "string"},
+          "basis": {"type": "string", "enum": ["user-stated", "assistant-reported", "inferred"]},
+          "source_quote": {"type": "string"}
+        },
+        "required": ["kind", "text", "basis", "source_quote"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["schema_version", "items"],
+  "additionalProperties": false
+}
