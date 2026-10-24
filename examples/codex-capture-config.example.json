@@ -1,0 +1,9 @@
+{
+  "schema": "codex-capture-config-v1",
+  "enabled": false,
+  "workspace": "OWNER_CONFIG_ONLY/private-staging",
+  "allowed_cwds": ["OWNER_CONFIG_ONLY/disposable-project"],
+  "profile": "second-brain-capture-synthetic",
+  "profile_sha256": "OWNER_REVIEWED_PROFILE_SHA256",
+  "source_privacy": "synthetic"
+}

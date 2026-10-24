@@ -12,6 +12,7 @@ reports/
 .env*
 !.env.example
 config.local.*
+capture-config.json
 __pycache__/
 .venv/
 .venv-graphify/

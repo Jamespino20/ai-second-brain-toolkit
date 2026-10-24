@@ -10,6 +10,7 @@ portable protocol regression test. It does not enable a model or publish memorie
 | `scripts/read_memory.py`, `memory_mcp.py` | Legacy operational preview | Exactly four historical unpublished notes; retained for compatibility. Private transport remains disabled for model sessions. |
 | `scripts/migrate.py` | Experimental local importer and draft workflow | Synthetic parsing/replay/provenance/branch/draft/FTS tests. No account-completeness or blocked-publisher acceptance claim. |
 | `scripts/capture_codex.py` | Explicit local snapshot helper | Stable supplied rollout bytes, dialogue extraction and evidence archive tested. Not automatic capture or a running session hook. |
+| `scripts/run_codex_capture.py`, `capture_outcomes.py` | Opt-in CLI capture MVP | Supported JSON/schema interface; synthetic fresh-session extraction, repeats, replay, failure, unauthorized paths and disable exercised. Proposals only. Native/desktop hooks not installed or tested. See automatic-capture-mvp.md. |
 | `scripts/backup.py` | Operational local snapshot helper | Synthetic bytes, hidden files, directories and restore checked. Source-path/root hardening and cloud independence are not generally certified. |
 | `scripts/source_report.py` (local, ignored) | Account-specific legacy helper; excluded | Contains historical assumptions and private taxonomy. Preserved locally, not part of the proposed repository. |
 | `config.example.json`, `examples/` | Inert templates | No credentials or real grant. Policy JSON is not parsed by the scripts. |
@@ -21,9 +22,9 @@ portable protocol regression test. It does not enable a model or publish memorie
 | `docs/` | Maintainer guides and historical demo notes | Historical results are dated; private event logs and machine-specific profiles remain outside Git. |
 
 The blocked custom Memory Manager is not implemented by these helpers. Automatic
-session capture, lifecycle write governance, attachment intake, complete-history
+background session capture, lifecycle write governance, attachment intake, complete-history
 coverage, Claude adapters and authenticated Claude retrieval remain incomplete.
-Read-only live retrieval and future automatic capture require separate scope and
+Read-only live retrieval and personal/background capture require separate scope and
 approval; publishing this toolkit does not authorize either milestone.
 
 ## Layout retained

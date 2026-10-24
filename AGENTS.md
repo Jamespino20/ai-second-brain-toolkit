@@ -52,3 +52,14 @@ separate explicit owner approval for exact note paths/hashes, named model provid
 purpose, and the personal-content external-processing exception. Publication
 approval alone is insufficient. No existing note metadata grants external access.
 Never generate/enable a live grant or add Claude access from synthetic-test consent.
+
+## Opt-in capture MVP
+
+`scripts/run_codex_capture.py` is an explicitly invoked CLI launcher, not a watcher.
+Use only the owner-approved private config, exact working directory and request.
+The current authorized demonstration is synthetic; do not redirect its profile to
+personal material. Raw evidence and candidate Markdown stay in private staging.
+Completion receipts prove a CLI turn, not domain acceptance. Preserve quoted,
+assistant-reported and inferred evidence distinctions. No native hooks, global
+config changes, canonical writes, blocked publisher or extra AI processor are
+authorized by the presence of this script. See docs/automatic-capture-mvp.md.
