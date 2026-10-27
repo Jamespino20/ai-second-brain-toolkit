@@ -8,7 +8,8 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from capture_outcomes import CaptureError, completed_report, load_config, privacy_check, stage_report
+from capture_outcomes import (CaptureError, LEGACY_PROVENANCE_TEXT, completed_report,
+                              load_config, privacy_check, stage_report)
 from migrate import json_bytes
 from run_codex_capture import capture_lock, replay_capture, run_capture, set_enabled
 
@@ -234,6 +235,136 @@ class CaptureMVPTests(unittest.TestCase):
         self.assertEqual(result['status'], 'STAGED')
         repeated = replay_capture(self.config_path, result['run_directory'])
         self.assertEqual(repeated['status'], 'DUPLICATE_SOURCE')
+
+    def assert_job_result(self, result):
+        job = json.loads((Path(result['run_directory']) / 'job.json').read_bytes())
+        expected = {key: value for key, value in result.items() if key != 'run_directory'}
+        self.assertEqual(job['state'], result['status'])
+        self.assertEqual(job['proposals'], result['proposals'])
+        self.assertEqual(job['result'], expected)
+        return job
+
+    def test_reporting_single_source_wording_and_reuse_preserve_attribution(self):
+        first = self.run_fixture()
+        candidate_path = self.root / first['candidate']
+        markdown_path = self.root / first['proposal']
+        saved = candidate_path.read_bytes(), markdown_path.read_bytes()
+        candidate = json.loads(saved[0])
+        self.assertIn('The originating capture receipt records', candidate['body'])
+        self.assertNotIn('Additional identical-session', candidate['body'])
+        self.assertEqual(candidate['sources'], [first['source']])
+        self.assertEqual(len(list((self.root / 'staging/codex-capture/receipts').glob('*.json'))), 1)
+        second = self.run_fixture(launcher=self.launcher(session='fixture-session-2'))
+        self.assertEqual(second['status'], 'CONTENT_REUSED')
+        self.assertNotEqual(second['source'], first['source'])
+        self.assertEqual(saved, (candidate_path.read_bytes(), markdown_path.read_bytes()))
+
+    def test_reporting_job_counts_staged_reused_duplicate_and_replay(self):
+        first = self.run_fixture()
+        original_job = self.assert_job_result(first)
+        self.assertEqual(first['proposals'], 1)
+        second = self.run_fixture(launcher=self.launcher(session='fixture-session-2'))
+        self.assert_job_result(second)
+        self.assertEqual((second['status'], second['proposals']), ('CONTENT_REUSED', 0))
+        duplicate = self.run_fixture()
+        self.assert_job_result(duplicate)
+        self.assertEqual((duplicate['status'], duplicate['proposals']), ('DUPLICATE_SOURCE', 0))
+        replayed = replay_capture(self.config_path, first['run_directory'])
+        job = json.loads((Path(first['run_directory']) / 'job.json').read_bytes())
+        for key in ('state', 'proposals', 'result'):
+            self.assertEqual(job[key], original_job[key])
+        self.assertEqual(job['last_replay_status'], 'DUPLICATE_SOURCE')
+        self.assertEqual(job['last_replay_result'], {k: v for k, v in replayed.items() if k != 'run_directory'})
+        receipts = [json.loads(p.read_bytes()) for p in (self.root / 'staging/codex-capture/receipts').glob('*.json')]
+        self.assertEqual(sum(r['proposals'] for r in receipts), 1)
+        self.assertEqual(len(list((self.root / 'test-vault').rglob('*.md'))), 1)
+        self.assertEqual(len(receipts), 2)
+
+    def test_reporting_job_no_outcome_and_replay_counts(self):
+        result = self.run_fixture(launcher=self.launcher(report={'schema_version': '1.0', 'items': []}))
+        self.assert_job_result(result)
+        self.assertEqual((result['status'], result['proposals']), ('NO_MEANINGFUL_OUTCOMES', 0))
+        receipt = json.loads(next((self.root / 'staging/codex-capture/receipts').glob('*.json')).read_bytes())
+        self.assertEqual(receipt, {k: v for k, v in result.items() if k != 'run_directory'})
+        replayed = replay_capture(self.config_path, result['run_directory'])
+        self.assertEqual((replayed['status'], replayed['proposals']), ('DUPLICATE_SOURCE', 0))
+        self.assertFalse((self.root / 'test-vault').exists())
+
+    def test_reporting_failed_jobs_have_matching_zero_results(self):
+        def timeout(*args):
+            raise CaptureError('CODEX_TIMEOUT_OR_INTERRUPTED')
+        for launcher in (self.launcher(exit_code=7), self.launcher(incomplete=True), timeout):
+            with self.subTest(launcher=launcher):
+                result = self.run_fixture(launcher=launcher)
+                self.assert_job_result(result)
+                self.assertEqual((result['status'], result['proposals']), ('FAILED', 0))
+        self.assertFalse((self.root / 'test-vault').exists())
+        self.assertFalse((self.root / 'staging/codex-capture/receipts').exists())
+
+    def test_reporting_disable_after_run_has_matching_zero_result(self):
+        result = self.run_fixture(launcher=self.launcher(mutate=lambda: set_enabled(self.config_path, False)))
+        self.assert_job_result(result)
+        self.assertEqual((result['status'], result['proposals']), ('DISABLED_AFTER_RUN', 0))
+        self.assertFalse((self.root / 'test-vault').exists())
+
+    def test_reporting_proposals_preserve_unimplemented_unexecuted_qualifiers(self):
+        report = {'schema_version': '1.0', 'items': [
+            {'kind': 'decision', 'text': 'Proposed implementation (not applied): return list(dict.fromkeys(values)).',
+             'basis': 'assistant-reported', 'source_quote': ''},
+            {'kind': 'decision', 'text': 'Proposed test (not executed): assert unique_in_order([]) == [].',
+             'basis': 'assistant-reported', 'source_quote': ''}]}
+        result = self.run_fixture(launcher=self.launcher(report=report))
+        candidate = json.loads((self.root / result['candidate']).read_bytes())
+        markdown = (self.root / result['proposal']).read_text(encoding='utf-8')
+        for index, item in enumerate(report['items']):
+            self.assertEqual(candidate['claims'][index]['text'], 'decision: ' + item['text'])
+            self.assertEqual(candidate['claims'][index]['evidence'], 'summary-derived')
+            self.assertEqual(candidate['claims'][index]['locator'], result['source'] + '/report/items/' + str(index))
+            self.assertIn(item['text'], markdown)
+        self.assertFalse(result['domain_claims_independently_verified'])
+        self.assertNotIn('**observed**', markdown)
+
+    def test_reporting_legacy_pinned_body_replays_and_reuses_without_rewrite(self):
+        with patch('capture_outcomes.PROVENANCE_TEXT', LEGACY_PROVENANCE_TEXT):
+            first = self.run_fixture()
+        paths = [self.root / first['candidate'], self.root / first['proposal']]
+        saved = [p.read_bytes() for p in paths]
+        self.assertEqual(replay_capture(self.config_path, first['run_directory'])['status'], 'DUPLICATE_SOURCE')
+        second = self.run_fixture(launcher=self.launcher(session='fixture-session-2'))
+        self.assertEqual(second['status'], 'CONTENT_REUSED')
+        self.assertEqual(saved, [p.read_bytes() for p in paths])
+        # Even repinning a tampered legacy candidate does not bypass reconstruction.
+        receipt_path = next(p for p in (self.root / 'staging/codex-capture/receipts').glob('*.json')
+                            if json.loads(p.read_bytes())['status'] == 'STAGED')
+        candidate = json.loads(saved[0])
+        candidate['claims'][0]['text'] = 'Fabricated completed implementation.'
+        paths[0].write_bytes(json_bytes(candidate))
+        receipt = json.loads(receipt_path.read_bytes())
+        receipt['candidate_sha256'] = hashlib.sha256(paths[0].read_bytes()).hexdigest()
+        receipt_path.write_bytes(json_bytes(receipt))
+        with self.assertRaisesRegex(CaptureError, 'CANDIDATE_MISMATCH'):
+            replay_capture(self.config_path, first['run_directory'])
+        result = self.run_fixture(launcher=self.launcher(session='fixture-session-3'))
+        self.assertEqual(result['status'], 'FAILED')
+
+    def test_reporting_receipt_write_failure_never_counts_partial_artifacts_as_success(self):
+        from capture_outcomes import write_new
+
+        def fail_receipt(path, data):
+            if path.parent.name == 'receipts':
+                raise OSError('synthetic receipt write failure')
+            return write_new(path, data)
+
+        with patch('capture_outcomes.write_new', side_effect=fail_receipt):
+            result = self.run_fixture()
+        self.assert_job_result(result)
+        self.assertEqual((result['status'], result['proposals']), ('FAILED', 0))
+        self.assertEqual(len(list((self.root / 'test-vault').rglob('*.md'))), 1)
+        self.assertEqual(len(list((self.root / 'staging/codex-capture/receipts').glob('*.json'))), 0)
+        # The preserved partial note has no completion receipt and is not silently accepted.
+        retry = self.run_fixture(launcher=self.launcher(session='fixture-session-2'))
+        self.assert_job_result(retry)
+        self.assertEqual((retry['status'], retry['proposals']), ('FAILED', 0))
 
     def test_process_failure_is_journaled_and_not_replayable(self):
         result = self.run_fixture(launcher=self.launcher(exit_code=7))
