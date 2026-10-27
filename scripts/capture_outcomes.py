@@ -15,6 +15,8 @@ from selected_memory import checked_path
 MAX_BYTES = 8 * 1024 * 1024
 KINDS = {'outcome', 'decision', 'lesson', 'milestone'}
 BASES = {'user-stated', 'assistant-reported', 'inferred'}
+PROVENANCE_TEXT = 'The originating capture receipt records this proposal\'s source provenance.'
+LEGACY_PROVENANCE_TEXT = 'Additional identical-session provenance is recorded in private capture receipts.'
 RISK_PATTERNS = {
     'credential': r'(?i)(?:gh[pousr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,}|sk-(?:proj-|ant-)?[a-z0-9_-]{24,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)',
     'secret_assignment': r'(?i)\b(?:api[_-]?key|access[_-]?token|password|secret)\b["\']?\s*[:=]\s*(?:["\'][^"\'\r\n]+["\']|[^\s"\',;{}\[\]]+)',
@@ -251,7 +253,7 @@ def make_candidate(value, source, privacy, timestamp):
             'body': ('The runner observed a completed CLI turn and exit code 0. This is not proof '
                      'that reported project work succeeded. Dates above describe capture, not an '
                      'unknown event date. Assistant reports and interpretations require review. '
-                     'Additional identical-session provenance is recorded in private capture receipts.'),
+                     + PROVENANCE_TEXT),
             'claims': [{'text': item['kind'] + ': ' + item['text'], 'evidence': basis[item['basis']],
                         'locator': source + '/report/items/' + str(i)} for i, item in enumerate(value['items'])]}
 
@@ -279,6 +281,12 @@ def verify_cached_candidate(root, expected):
         if datetime.fromisoformat(timestamp).utcoffset() != timezone.utc.utcoffset(None):
             raise CaptureError('CANDIDATE_MISMATCH')
         reconstructed = make_candidate(report, source, original['source_privacy'], timestamp)
+        # Preserve previously pinned proposals without rewriting historical evidence.
+        # Only the exact old boilerplate is compatible; every other field, source,
+        # candidate hash and Markdown byte must still match the original receipt.
+        legacy_body = reconstructed['body'].removesuffix(PROVENANCE_TEXT) + LEGACY_PROVENANCE_TEXT
+        if candidate.get('body') == legacy_body:
+            reconstructed['body'] = legacy_body
         if (digest(data) != original['candidate_sha256']
                 or ('candidate_sha256' in expected and digest(data) != expected['candidate_sha256'])
                 or json.dumps(candidate, sort_keys=True) != json.dumps(reconstructed, sort_keys=True)):

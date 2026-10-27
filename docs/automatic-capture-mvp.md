@@ -136,6 +136,35 @@ and synthetic versus personal provenance. It is not semantic deduplication.
 Changed reports are separate proposals. Existing edited candidates are never
 overwritten; an empty report records `NO_MEANINGFUL_OUTCOMES` without a note.
 
+### Pilot reporting corrections
+
+New proposals say: "The originating capture receipt records this proposal's source
+provenance." This describes one originating source without implying another session.
+Reuse leaves that original proposal and its citations immutable; another verified
+source is recorded only in its own receipt. The exact former boilerplate remains
+valid for previously pinned candidates, with all receipt, reconstruction and
+Markdown hash checks retained. Historical proposals are not rewritten.
+
+`proposals` counts newly completed proposals for an operation, not claims, raw
+Markdown files or all proposals already in the workspace. `STAGED` is 1;
+`CONTENT_REUSED`, `DUPLICATE_SOURCE`, `NO_MEANINGFUL_OUTCOMES`, disabled and failed
+operations are 0. Each terminal job's top-level count and nested result now agree.
+Failures include a nested safe-code result. A successful receipt proves completed
+staging; partial files left by a failed write are not completed proposals.
+
+Replay preserves the original job's state/count/result and immutable receipt.
+Its separate `last_replay_status` and `last_replay_result` record the replay's
+zero-addition result. A historical `STAGED` receipt still counts its original
+addition as 1; replay or a duplicate run returns 0 additional proposals. Do not sum
+duplicate/replay output as new notes or infer a mismatch from these distinct scopes.
+Existing historical job summaries are not automatically repaired.
+
+Proposed code and test cases retain their exact qualifiers and source-item links,
+with `summary-derived` evidence for assistant reports. Completion facts describe
+the CLI turn only. These labels do not independently prove the model's domain
+claims or owner acceptance; review must check suggested versus applied/executed
+work before publication.
+
 ### Focused R1 integrity correction
 
 Receipts now pin archived events, final response, original prompt and complete

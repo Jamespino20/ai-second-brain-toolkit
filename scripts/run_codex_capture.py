@@ -140,12 +140,11 @@ def run_capture(config_path, cwd, prompt_path, timeout=300, launcher=invoke_code
             if job['codex_exit_code'] != 0:
                 raise CaptureError('CODEX_PROCESS_FAILED')
             result = finish(config_path, config, root, config_sha, run_dir, job)
-            job.update(state=result['status'], result=result)
         except Exception as error:
             code = str(error) if isinstance(error, CaptureError) else 'CAPTURE_IO_OR_FORMAT_FAILURE'
-            job.update(state='FAILED', error_code=code)
-            save_job(run_dir, job)
-            return {'status': 'FAILED', 'error_code': code, 'run_directory': str(run_dir), 'proposals': 0}
+            result = {'status': 'FAILED', 'error_code': code, 'proposals': 0}
+            job['error_code'] = code
+        job.update(state=result['status'], proposals=result['proposals'], result=result)
         save_job(run_dir, job)
         return {**result, 'run_directory': str(run_dir)}
 
@@ -165,7 +164,7 @@ def replay_capture(config_path, run_directory):
         if job.get('codex_exit_code') != 0:
             raise CaptureError('FAILED_RUN_NOT_REPLAYABLE')
         result = finish(config_path, config, root, config_sha, run_dir, job)
-        save_job(run_dir, {**job, 'last_replay_status': result['status']})
+        save_job(run_dir, {**job, 'last_replay_status': result['status'], 'last_replay_result': result})
         return {**result, 'run_directory': str(run_dir)}
 
 
