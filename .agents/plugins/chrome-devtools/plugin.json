@@ -1,0 +1,4 @@
+{
+  "name": "chrome-devtools",
+  "description": "Project-scoped Chrome DevTools MCP server for browser testing and inspection"
+}
