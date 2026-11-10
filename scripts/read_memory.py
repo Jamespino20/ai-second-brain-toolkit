@@ -9,6 +9,14 @@ import json
 import re
 from pathlib import Path
 
+try:
+    from . import _compat  # noqa: F401
+except (ImportError, ValueError):
+    try:
+        import _compat  # noqa: F401
+    except ImportError:
+        pass
+
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
@@ -17,7 +25,7 @@ def digest(data):
 def local_regular_file(path):
     path = Path(path).absolute()
     for part in [path, *path.parents]:
-        if part.is_symlink() or part.is_junction():
+        if part.is_symlink() or getattr(part, 'is_junction', lambda: False)():
             raise ValueError('Linked paths are not supported')
     if any(part.lower().startswith('onedrive') or part.lower() == '.git' for part in path.parts):
         raise ValueError('Live/synced and Git sources are excluded')

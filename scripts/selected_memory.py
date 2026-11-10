@@ -9,6 +9,14 @@ import re
 from pathlib import Path, PurePosixPath
 from urllib.parse import quote
 
+try:
+    from . import _compat  # noqa: F401
+except (ImportError, ValueError):
+    try:
+        import _compat  # noqa: F401
+    except ImportError:
+        pass
+
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
@@ -20,7 +28,7 @@ def checked_path(path, directory=False):
         raise ValueError('Absolute configured paths required')
     for part in [path, *path.parents]:
         st = part.lstat()
-        if part.is_symlink() or part.is_junction() or getattr(st, 'st_reparse_tag', 0) & 0x20000000:
+        if part.is_symlink() or getattr(part, 'is_junction', lambda: False)() or getattr(st, 'st_reparse_tag', 0) & 0x20000000:
             raise ValueError('Redirected paths refused')
     if directory:
         if not path.is_dir():
