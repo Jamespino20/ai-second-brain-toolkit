@@ -325,7 +325,8 @@ def run_profile(profile, manifest_digest):
         if not ready:
             raise ValueError('ready was not emitted')
         status = 'lifetime_elapsed'
-    except (Exception, KeyboardInterrupt, SystemExit):
+    except (Exception, KeyboardInterrupt, SystemExit) as exc:
+        import traceback; traceback.print_exc()
         status = 'error'
     finally:
         def report_hold(reason):
