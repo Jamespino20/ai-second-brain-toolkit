@@ -494,6 +494,11 @@ class ProfileTests(unittest.TestCase):
             def kill(self): self.alive = False
         with tempfile.TemporaryDirectory() as directory:
             profile, manifest, digest, source = self.make_profile(directory)
+            profile['lifetime_seconds'] = 3
+            profile['startup_timeout_seconds'] = 3
+            raw = json.dumps(profile).encode()
+            manifest.write_bytes(raw)
+            digest = hashlib.sha256(raw).hexdigest()
             child = Child()
             with patch.object(launcher, '__file__', str(source)), patch.object(launcher, '_creation_filetime', return_value=123456789), patch.object(launcher.subprocess, 'Popen', return_value=child) as popen:
                 self.assertEqual(launcher.main([str(manifest), digest]), 0)
