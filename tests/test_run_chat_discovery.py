@@ -519,7 +519,7 @@ class ProfileTests(unittest.TestCase):
             manifest.write_bytes(raw)
             digest = hashlib.sha256(raw).hexdigest()
             child = Child()
-            with patch.object(launcher, '__file__', str(source)), patch.object(launcher, '_creation_filetime', return_value=123456789), patch.object(launcher.subprocess, 'Popen', return_value=child) as popen:
+            with patch.object(launcher, '__file__', str(source)), patch.object(launcher, '_creation_filetime', return_value=123456789), patch('platform.win32_ver', return_value=('10', '10.0.22631', '', '')), patch.object(launcher.subprocess, 'Popen', return_value=child) as popen:
                 self.assertEqual(launcher.main([str(manifest), digest]), 0)
             self.assertFalse(child.alive)
             intent = json.loads(Path(profile['intent_path']).read_text())
