@@ -18,6 +18,5 @@ licenses continue to apply when installed. Lockfiles retain the existing wheel p
 this preparation does not certify vulnerability-free dependencies or portability
 outside the tested environment.
 
-No license for the toolkit's original code has been selected by this preparation.
-The copied third-party license texts do not automatically license the whole toolkit.
-Choose an original-code license separately before offering broader reuse rights.
+The toolkit's original code is licensed under the MIT License. See the [LICENSE](LICENSE) file for the full license text.
+Copied third-party components retain their upstream licenses as listed above and in `THIRD-PARTY-LICENSES/`.

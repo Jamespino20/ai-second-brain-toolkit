@@ -4,6 +4,7 @@
 > *Zero cloud subscriptions • Strict local stdio IPC • Single-source Markdown truth*
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-454%20Passing-brightgreen.svg)]()
 [![Privacy](https://img.shields.io/badge/Privacy-Fail--Closed%20%7C%20Zero%20PII-purple.svg)]()
 [![Cost](https://img.shields.io/badge/Cost-%240%20%2F%20Free-emerald.svg)]()
@@ -173,10 +174,15 @@ python -m pip install --index-url https://pypi.org/simple --require-hashes -r re
 - [Client Compatibility Guide](docs/client-compatibility.md)
 - [Export Intake & Migration](docs/export-intake.md)
 - [Wiki Health Diagnostics](docs/wiki-health.md)
+- [Contribution Guidelines](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
 - [Third-Party Licenses & Attribution](THIRD_PARTY.md)
 
 ---
 
 ## 📄 License & Attribution
 
-This toolkit is an independent project designed for Obsidian vaults and MCP-compliant AI agents. It incorporates format references from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) (MIT) and design inspiration from [Graphify](https://github.com/Graphify-Labs/graphify) (Apache-2.0 / MIT). See [THIRD_PARTY.md](THIRD_PARTY.md) for full attribution.
+This toolkit is licensed under the [MIT License](LICENSE).  
+Copyright (c) 2026 Ahron Vince Gingco (Heiron8).
+
+It incorporates format references from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) (MIT) and design inspiration from [Graphify](https://github.com/Graphify-Labs/graphify) (Apache-2.0 / MIT). See [THIRD_PARTY.md](THIRD_PARTY.md) for full upstream provenance.
