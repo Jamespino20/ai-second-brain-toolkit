@@ -306,14 +306,13 @@ def run_profile(profile, manifest_digest):
             try:
                 server.run(sockets=[duplicate])
             except BaseException:
-                import traceback; traceback.print_exc()
+                pass
         thread = threading.Thread(target=serve, daemon=True)
         thread.start()
         ready = False
         while time.monotonic() < end:
             with lock:
                 if guard.failed or guard.origin != origin or child.poll() is not None or not thread.is_alive():
-                    print(f"STOPPED_DEBUG: failed={guard.failed} origin={guard.origin} child_poll={child.poll()} thread_alive={thread.is_alive()}", file=sys.stderr)
                     raise ValueError('session stopped')
                 if server.started and not ready:
                     message = json.dumps({'status': 'metadata-only', 'origin': origin,
@@ -326,8 +325,7 @@ def run_profile(profile, manifest_digest):
         if not ready:
             raise ValueError('ready was not emitted')
         status = 'lifetime_elapsed'
-    except (Exception, KeyboardInterrupt, SystemExit) as exc:
-        import traceback; traceback.print_exc()
+    except (Exception, KeyboardInterrupt, SystemExit):
         status = 'error'
     finally:
         def report_hold(reason):

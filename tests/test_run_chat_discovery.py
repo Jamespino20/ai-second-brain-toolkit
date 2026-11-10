@@ -10,6 +10,7 @@ import tempfile
 import io
 import contextlib
 import os
+import platform
 import _thread
 import types
 import queue
@@ -17,6 +18,9 @@ import re
 from pathlib import Path
 import unittest
 from unittest.mock import patch
+
+if sys.platform == 'win32':
+    platform.win32_ver()
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from run_chat_discovery import open_exclusive_listener
@@ -108,6 +112,9 @@ class ProfileTests(unittest.TestCase):
                 def terminate(self): self.alive = False
                 def wait(self, timeout): return 0
                 def kill(self): self.alive = False
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def communicate(self, *args, **kwargs): return (b'', b'')
             class Server:
                 started = False
                 should_exit = False
@@ -204,6 +211,9 @@ class ProfileTests(unittest.TestCase):
                 def terminate(self): self.alive = False
                 def wait(self, timeout): return 0
                 def kill(self): self.alive = False
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def communicate(self, *args, **kwargs): return (b'', b'')
             child = Child()
             with patch.object(launcher, '__file__', str(source)), patch.object(launcher, '_creation_filetime', side_effect=OSError()), patch.object(launcher.subprocess, 'Popen', return_value=child), patch('uvicorn.Server') as server:
                 self.assertEqual(launcher.main([str(manifest), digest]), 1)
@@ -225,6 +235,9 @@ class ProfileTests(unittest.TestCase):
                 def terminate(self): self.alive = False
                 def wait(self, timeout): return 0
                 def kill(self): self.alive = False
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def communicate(self, *args, **kwargs): return (b'', b'')
             class Server:
                 started = False
                 should_exit = False
@@ -257,6 +270,9 @@ class ProfileTests(unittest.TestCase):
                 def terminate(self): self.alive = False
                 def wait(self, timeout): return 0
                 def kill(self): self.alive = False
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def communicate(self, *args, **kwargs): return (b'', b'')
             class Server:
                 started = False
                 should_exit = False
@@ -492,6 +508,9 @@ class ProfileTests(unittest.TestCase):
                     raise subprocess.TimeoutExpired('fake', timeout)
                 return 0
             def kill(self): self.alive = False
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def communicate(self, *args, **kwargs): return (b'', b'')
         with tempfile.TemporaryDirectory() as directory:
             profile, manifest, digest, source = self.make_profile(directory)
             profile['lifetime_seconds'] = 3
@@ -529,6 +548,9 @@ class ProfileTests(unittest.TestCase):
             def terminate(self): self.alive = False
             def wait(self, timeout): return 0 if not self.alive else None
             def kill(self): self.alive = False
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def communicate(self, *args, **kwargs): return (b'', b'')
         with tempfile.TemporaryDirectory() as directory:
             profile, manifest, digest, source = self.make_profile(directory)
             child = Child()
@@ -620,6 +642,9 @@ class ProfileTests(unittest.TestCase):
                 def terminate(self): self.alive = False
                 def wait(self, timeout): return 0
                 def kill(self): self.alive = False
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def communicate(self, *args, **kwargs): return (b'', b'')
             class Server:
                 started = False
                 should_exit = False
@@ -660,6 +685,9 @@ class ProfileTests(unittest.TestCase):
                         if action == 'collision': receipt_path.write_bytes(b'preserve')
                     def wait(self, timeout): return 0
                     def kill(self): self.alive = False
+                    def __enter__(self): return self
+                    def __exit__(self, *args): pass
+                    def communicate(self, *args, **kwargs): return (b'', b'')
                 class Server:
                     started = False
                     should_exit = False
@@ -699,6 +727,9 @@ class ProfileTests(unittest.TestCase):
                 def terminate(self): self.alive = False
                 def wait(self, timeout): return 0
                 def kill(self): self.alive = False
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def communicate(self, *args, **kwargs): return (b'', b'')
             class Server:
                 started = False
                 should_exit = False
@@ -727,6 +758,9 @@ class ProfileTests(unittest.TestCase):
                     def terminate(self): self.alive = False
                     def wait(self, timeout): return 0
                     def kill(self): self.alive = False
+                    def __enter__(self): return self
+                    def __exit__(self, *args): pass
+                    def communicate(self, *args, **kwargs): return (b'', b'')
                 child = Child()
                 with patch.object(launcher, '__file__', str(source)), patch.object(launcher, '_creation_filetime', return_value=123456789), patch.object(launcher.subprocess, 'Popen', return_value=child), patch('uvicorn.Server') as server:
                     self.assertEqual(launcher.main([str(manifest), digest]), 1)
@@ -747,6 +781,9 @@ class ProfileTests(unittest.TestCase):
                     def terminate(self): self.alive = False
                     def wait(self, timeout): return 0
                     def kill(self): self.alive = False
+                    def __enter__(self): return self
+                    def __exit__(self, *args): pass
+                    def communicate(self, *args, **kwargs): return (b'', b'')
                 child = Child()
                 def fail_server(*args, **kwargs): raise RuntimeError('synthetic failure')
                 def interrupt(*args, **kwargs): raise KeyboardInterrupt()
