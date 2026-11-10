@@ -1594,4 +1594,12 @@ Synthetic tests do not establish live Chat compatibility. Form callback and depe
 - [x] Complete independent adversarial review of T16 (`handoffs/2026-11-06-wiki-health-review.md`, SHA-256 `568085b12a1c07aa2334fb8fac614ba45ce44c37b8ddbb546ab4219ff27b1b6a`, PASS with three caught in-memory mutations).
 - [ ] Wire `scripts/publish_memory.py` to T05/T07 after the current `T13a` desktop Chat trial package gate completes or is released, and obtain separate live canonical authorization before enabling updates/linking or live health scans.
 
-Combined repository test suite now totals 413 tests (407 passed, 6 expected Windows symlink privilege skips).
+Combined repository test suite now totals 413 tests (407 passed, 6 expected Windows symlink privilege skips).
+
+
+## Security Hardening Tasks (2026-11-10 Audit)
+
+- [x] Issue 1: Pin `chrome-devtools-mcp` dependency version to `@1.12.0` in `.agents/plugins/chrome-devtools/mcp_config.json` to prevent arbitrary untrusted code execution from npm `@latest` tag drift.
+- [x] Issue 2: Pin exact dependency versions in `.github/workflows/ci.yml` (`mcp==2.3.0`, `pydantic==2.14.1`, `anyio==4.15.1`, `uvicorn==0.54.0`, `starlette==1.9.0`, `jsonschema==4.26.0`) for deterministic multi-python CI runs across Python 3.11, 3.12, and 3.13.
+- [x] Issue 3: Prevent sensitive source references from leaking outside process memory by enforcing that `source_references` strings do not contain absolute paths (drive letters `[a-zA-Z]:` or UNC paths `\\`), root paths, directory traversals (`..`), or local file URIs, protecting provenance metadata across citation and manifest boundaries.
+

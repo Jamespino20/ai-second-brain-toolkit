@@ -256,7 +256,7 @@ class ManagedMemoryTests(unittest.TestCase):
         self.assertTrue(all(value['manifest_generation'] == 1 for value in results))
 
     def test_citation_references_over_bounds_refused_without_truncation(self):
-        for refs in [['x' * 50000], ['a'] * 9, ['x' * 513], ['x' * 512] * 5]:
+        for refs in [['x' * 50000], ['a'] * 9, ['x' * 513], ['x' * 512] * 5, ['C:\\leaked\\note.md'], ['/etc/passwd'], ['notes/../../secret']]:
             self.manifest['generation'] += 1
             self.manifest['notes'][0]['source_references'] = refs
             self.publish()

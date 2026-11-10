@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from selected_memory import digest, read_selected, search_selected
+from selected_memory import citation, digest, is_safe_source_reference, read_selected, search_selected
 
 
 class SelectedMemoryTests(unittest.TestCase):
@@ -116,6 +116,40 @@ class SelectedMemoryTests(unittest.TestCase):
         for start, count in ((0, 1), (1, 41), (99, 1)):
             with self.subTest(start=start, count=count), self.assertRaises(ValueError):
                 read_selected(self.manifest, self.pin, 'codex-openai', 'decision', start, count)
+
+    def test_is_safe_source_reference_policy(self):
+        valid = ['synthetic://fixture/1', 'synthetic:source', 'fixture/message/0', 'valid_ref-123', 'a' * 512]
+        for ref in valid:
+            with self.subTest(valid=ref):
+                self.assertTrue(is_safe_source_reference(ref))
+
+        invalid = [
+            'C:\\Users\\leaked\\path.md', 'c:/Users/leaked/path.md', 'D:notes.md',
+            '\\\\server\\share\\note.md', '//server/share/note.md',
+            '/root/absolute.md', '\\windows\\system32',
+            'notes/../../traversal', '..', 'notes/..',
+            'file:///C:/Users/secret.md', 'file://localhost/etc/passwd',
+            '', '   ', 'x' * 513, 123, None, ['nested'],
+        ]
+        for ref in invalid:
+            with self.subTest(invalid=ref):
+                self.assertFalse(is_safe_source_reference(ref))
+
+    def test_unsafe_source_references_in_grant_refused(self):
+        for unsafe in ('C:\\secret.md', '/etc/passwd', 'notes/../../secret', 'file:///c:/secret'):
+            with self.subTest(unsafe=unsafe):
+                self.grant['notes'][0]['source_references'] = [unsafe]
+                self.pin = self.repin()
+                with self.assertRaisesRegex(ValueError, 'Invalid'):
+                    self.search()
+
+    def test_citation_filters_unsafe_source_references(self):
+        note = {
+            'id': 'decision', 'path': 'decision.md', 'sha256': 'a' * 64,
+            'source_references': ['synthetic://safe/1', 'C:\\leaked\\note.md', '/etc/shadow', 'file:///c:/pass', 'valid://safe/2']
+        }
+        cite = citation(self.grant, note, self.path)
+        self.assertEqual(cite['source_references'], ['synthetic://safe/1', 'valid://safe/2'])
 
 
 if __name__ == '__main__':

@@ -22,6 +22,21 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def is_safe_source_reference(ref):
+    if not isinstance(ref, str) or not ref.strip() or len(ref) > 512:
+        return False
+    stripped = ref.strip()
+    if re.match(r'^[a-zA-Z]:', stripped) or re.search(r'(?:^|[^a-zA-Z0-9])[a-zA-Z]:[\\/]', stripped):
+        return False
+    if stripped.startswith('\\') or stripped.startswith('//') or stripped.startswith('/'):
+        return False
+    if '\\\\' in stripped or '..' in stripped:
+        return False
+    if 'file:' in stripped.lower():
+        return False
+    return True
+
+
 def checked_path(path, directory=False):
     path = Path(path)
     if not path.is_absolute():
@@ -74,6 +89,9 @@ def load_selected(manifest_path, manifest_sha256, client):
                 or any(c in relative for c in '\\:*?"<>|')
                 or relative.casefold() in seen_paths):
             raise ValueError('Invalid or duplicate selected-note identity/path')
+        refs = note.get('source_references', [])
+        if not isinstance(refs, list) or len(refs) > 8 or not all(is_safe_source_reference(r) for r in refs) or sum(map(len, refs)) > 2048:
+            raise ValueError('Invalid source_references')
         seen_ids.add(note_id)
         seen_paths.add(relative.casefold())
         path = checked_path(root.joinpath(*rel.parts))
@@ -94,9 +112,10 @@ def load_selected(manifest_path, manifest_sha256, client):
 
 
 def citation(grant, note, path):
+    safe_refs = [r for r in note.get('source_references', []) if is_safe_source_reference(r)]
     return {'note_id': note['id'], 'path': note['path'], 'relative_path': note['path'],
             'sha256': note['sha256'], 'source_kind': grant['source_kind'],
-            'client': grant['client'], 'source_references': note.get('source_references', []),
+            'client': grant['client'], 'source_references': safe_refs,
             'obsidian_uri': 'obsidian://open?vault=' + quote(Path(grant['root']).name, safe='')
                             + '&file=' + quote(note['path'], safe='')}
 

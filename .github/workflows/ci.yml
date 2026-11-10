@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install mcp pydantic anyio uvicorn starlette jsonschema
+          python -m pip install "mcp==2.3.0" "pydantic==2.14.1" "anyio==4.15.1" "uvicorn==0.54.0" "starlette==1.9.0" "jsonschema==4.26.0"
 
       - name: Run environment diagnostics
         run: |

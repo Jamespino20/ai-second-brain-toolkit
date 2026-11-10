@@ -6,7 +6,7 @@ import re
 import threading
 
 from migrate import private_root
-from selected_memory import checked_path, citation, digest
+from selected_memory import checked_path, citation, digest, is_safe_source_reference
 
 _HIGH_WATER = {}
 _LOCK = threading.Lock()
@@ -151,7 +151,7 @@ def _load(grant_path, grant_sha256, client):
                  and note.get('external_processing') is False
                  and isinstance(note.get('source_references'), list)
                  and len(note['source_references']) <= 8
-                 and all(_string(value) and len(value) <= 512 for value in note['source_references'])
+                 and all(_string(value) and len(value) <= 512 and is_safe_source_reference(value) for value in note['source_references'])
                  and sum(len(value) for value in note['source_references']) <= 2048)
         seen_ids.add(note['id'])
         seen_paths.add(relative.casefold())

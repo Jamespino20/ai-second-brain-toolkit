@@ -10,7 +10,7 @@ from pathlib import Path, PurePosixPath
 import re
 import sys
 
-from selected_memory import checked_path, citation, digest
+from selected_memory import checked_path, citation, digest, is_safe_source_reference
 
 _CLIENTS = ('codex-openai', 'claude-anthropic', 'chatgpt-openai')
 _MAX_MANIFEST_BYTES = 1048576
@@ -480,7 +480,7 @@ def load_health_subset(manifest_path, manifest_sha256, client):
             raise ValueError('Selected note too large')
 
         refs = note.get('source_references', [])
-        if not isinstance(refs, list) or len(refs) > 16 or not all(isinstance(r, str) and r.strip() and len(r) <= 512 for r in refs):
+        if not isinstance(refs, list) or len(refs) > 16 or not all(isinstance(r, str) and r.strip() and len(r) <= 512 and is_safe_source_reference(r) for r in refs):
             raise ValueError('Invalid source_references')
 
         full_path = checked_path(root.joinpath(*rel.parts))

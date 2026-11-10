@@ -7,7 +7,7 @@ import re
 
 from publish_memory import (load_policy, publication_lock, read_bytes, replace_pointer,
                             write_immutable)
-from selected_memory import checked_path
+from selected_memory import checked_path, is_safe_source_reference
 
 _ID = re.compile(r'[A-Za-z0-9_-]{1,80}\Z')
 _HASH = re.compile(r'[0-9a-f]{64}\Z')
@@ -196,7 +196,7 @@ def _load(private_root, manifest_path, manifest_sha256, policy_path, policy_sha2
         _require(len(parts) > 1 and parts[0].casefold() != 'system' and note['path'].casefold() not in paths
                  and any(note['path'].startswith(p) for p in policy['write_scope']['create_prefixes']))
         refs = note['source_references']
-        _require(isinstance(refs, list) and 1 <= len(refs) <= 8 and all(isinstance(x, str) and x.strip() and len(x) <= 512 for x in refs)
+        _require(isinstance(refs, list) and 1 <= len(refs) <= 8 and all(isinstance(x, str) and x.strip() and len(x) <= 512 and is_safe_source_reference(x) for x in refs)
                  and sum(map(len, refs)) <= 2048)
         _require(note['source'].casefold() not in sources)
         sources.add(note['source'].casefold())
@@ -263,7 +263,7 @@ def _state(directory, policy, pin):
         _path(note['path'], True)
         _require(note['path'].casefold() not in paths)
         refs = note['source_references']
-        _require(isinstance(refs, list) and 1 <= len(refs) <= 8 and all(isinstance(x, str) and x.strip() and len(x) <= 512 for x in refs)
+        _require(isinstance(refs, list) and 1 <= len(refs) <= 8 and all(isinstance(x, str) and x.strip() and len(x) <= 512 and is_safe_source_reference(x) for x in refs)
                  and sum(map(len, refs)) <= 2048)
         ids.add(note['id']); paths.add(note['path'].casefold())
     return pointer_bytes, state, pointer['sha256']

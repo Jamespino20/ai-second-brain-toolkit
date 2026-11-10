@@ -25,7 +25,7 @@ from chat_recall_oauth import OwnerOAuth, RedactedOAuth
 from managed_memory import _load, read_managed, search_managed
 from publish_memory import read_bytes
 from save_interactive_memory import cleanup_staged_chat_memory, stage_chat_memory
-from selected_memory import checked_path
+from selected_memory import checked_path, is_safe_source_reference
 
 
 class _RedactedServer(MCPServer):
@@ -321,7 +321,7 @@ def _build_app(owner, grant_path, grant_sha256, client, origin, loopback_port, o
                 'url': match.get('obsidian_uri', ''),
                 'note_id': nid,
                 'sha256': match.get('sha256', ''),
-                'source_references': match.get('source_references', []),
+                'source_references': [r for r in match.get('source_references', []) if is_safe_source_reference(r)],
             })
         return {**raw, 'results': results}
 

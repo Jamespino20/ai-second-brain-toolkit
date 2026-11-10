@@ -9,6 +9,8 @@ import json
 import re
 from pathlib import Path
 
+from selected_memory import is_safe_source_reference
+
 try:
     from . import _compat  # noqa: F401
 except (ImportError, ValueError):
@@ -87,7 +89,7 @@ def search(manifest_path, expected_manifest_sha256, query, limit=4):
         matches.append({'note_id': note['id'], 'path': str(path), 'sha256': note['sha256'],
                         'content_approval': 'owner-approved', 'publication_state': 'NOT_PUBLISHED',
                         'privacy': 'personal', 'scope': 'engineering', 'line': index + 1,
-                        'excerpt': lines[index], 'source_references': re.findall(r'^   Source: (.+)$', text, re.MULTILINE),
+                        'excerpt': lines[index], 'source_references': [s for s in re.findall(r'^   Source: (.+)$', text, re.MULTILINE) if is_safe_source_reference(s)],
                         'score': score + 2 * sum(term in lines[heading].lower() for term in terms)})
     matches.sort(key=lambda item: (-item['score'], item['note_id']))
     return {'query': query, 'mode': 'local-read-only-reviewed-preview',
