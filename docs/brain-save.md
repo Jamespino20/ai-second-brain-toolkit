@@ -9,8 +9,34 @@ $brain-save
 Codex extracts up to eight essential decisions, work/test reports, lessons, blockers,
 review observations and next actions from its available context, then invokes the
 local adapter once. No separate Codex/model session, handoff copy or transcript
-export is involved. The reply gives STAGED, DUPLICATE_SOURCE,
+export is involved. With no publication settings, the reply gives STAGED, DUPLICATE_SOURCE,
 NO_MEANINGFUL_OUTCOMES or a safe refusal code and, when applicable, the proposal path.
+
+On the approved local host, create-only publication and brain-recall were installed
+and activated on 2026-11-02. A harmless canonical save, replay, publication-settings
+disable and blind fresh Codex CLI recall passed. Use `$brain-recall` with a narrow
+question to retrieve enrolled knowledge. The standing Codex/OpenAI grant covers only
+notes enrolled by this publisher, including its citation metadata. See
+[release status](brain-memory-release.md). Existing-note updates, automatic contextual
+linking remain pending. The exact pilot's OneDrive cloud bytes were later verified;
+B also observed native Backed up and synced and exact-pilot local availability.
+Ongoing health remains a separate observation, not a publisher guarantee.
+
+## Native managed recall on the local host
+
+The separately configured read-only `second_brain_managed` MCP now works in this
+local app and a fresh Codex CLI. Installed `$brain-recall` prefers those native
+search/read tools; command fallback applies only when they are absent, never after
+an MCP refusal/error. Start context reads with five lines; both the 40-line and
+8000-character ceilings still apply. Cite returned note ID, hash, lines and source
+metadata. The existing approved enrolled corpus is shared by these local clients.
+The five reviewed historical notes were separately imported and enrolled under
+`second_brain_history`; use that explicit server for this pilot. The installed
+brain-recall route keeps its existing session-memory corpus, without aggregation.
+Native historical recall now passes in the local app after supported app-server
+configuration reload, and in the separately recorded fresh CLI test. This
+connection adds no MCP save tool or app-side save proof.
+See [client evidence and configuration limits](client-compatibility.md#managed-mcp-connection-and-official-obsidian-cli).
 
 ## Install once
 
@@ -33,7 +59,8 @@ $settings = @{
 [IO.File]::WriteAllText((Join-Path $skill 'local.json'), ($settings | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
 ```
 
-This installation was performed and tested during implementation. `local.json`
+The original staging-only installation was performed and tested during implementation;
+the current host has since received the separately approved update. `local.json`
 contains machine-specific paths and stays outside Git. The private root must
 already have the existing `.private-staging.json` marker denying live writes and
 external exports. No package installation or new database is required.
@@ -72,7 +99,7 @@ it does not make raw personal context safe by itself.
 
 ## Staging, review and disable
 
-All data stays under the configured private root:
+Staging artifacts stay under the configured private root:
 
 ```text
 archive/<hash>.brain-save-context.json
@@ -83,15 +110,42 @@ test-vault/logs/brain-save/<project>/<session-role>/<hash>.md
 
 The archive is the exact normalized summary packet and artifact hashes, **not the
 conversation transcript**. Candidates keep `review_state: candidate`, personal
-privacy, engineering scope and `external_processing: false`. No publisher, indexer,
-capture watcher or connector is invoked. Missing/tampered cached evidence is refused,
+privacy, engineering scope and `external_processing: false`. Without paired publication
+settings, no publisher is invoked. No indexer, capture watcher or connector is invoked.
+Missing/tampered cached evidence is refused,
 not repaired silently. Existing renderer boilerplate still says demonstration;
 that generic label does not turn real session summaries into synthetic evidence.
 
-Review the returned Markdown and references. Accept/reject outside the immutable
-records; publication still needs separate approval. To stop, simply do not invoke
+For staging-only use, review the returned Markdown and references. Accept/reject outside
+the immutable records. Publication requires a separately approved standing policy;
+ordinary captures within that policy do not require per-note approval. To stop, do not invoke
 the skill. For removal, move only the installed brain-save folder out of the skill
 search path after saving needed settings; staged proposals remain private.
+
+## Optional source publication and recall
+
+The adapter accepts paired `--policy` and `--policy-sha256` host arguments. The skill
+reads the matching optional `publication_policy` and `publication_policy_sha256`
+settings; it cannot create a policy or repin approval. No flags preserve the existing
+staging result. Configured mode retains that result and adds nested `publication`
+status/counts, including refusals and partial outcomes. Only verified publications
+count as saved. Canonical note metadata remains personal/external-processing false,
+with policy validation distinguished from human review. Cloud sync is UNVERIFIED.
+
+The create-only publisher writes only approved new paths, keeps private journals and
+hash-bound managed manifests, and refuses changed enrolled notes. It does not update
+existing prose, delete notes, compile the history archive or maintain project hubs.
+The current implementation caps the corpus at 256 notes and each note at 128000 bytes;
+capacity refusal requires a later scope decision, not silent expansion.
+
+`skills/brain-recall` invokes `scripts/recall_managed_memory.py` with a fixed named-client
+grant. Search returns at most four matches; read returns at most 40 lines and 8000
+total characters. Begin with small relevant context windows; the 40-line ceiling
+does not guarantee that a request fits. On any refusal, stop without automatic
+smaller-window retries. Only enrolled
+notes within the separately approved scope are eligible. Publication does not authorize
+external-model reads; the standing grant records that exception explicitly. Exact
+host settings and interfaces are in [the shared contract](brain-memory-contract.md).
 
 ## Host permissions and desktop
 
@@ -128,9 +182,28 @@ Sources: [official skills](https://learn.chatgpt.com/docs/build-skills),
 & .\.venv-graphify\Scripts\python.exe -B -m unittest discover -s tests -v
 ```
 
-The implementation run completed 96 tests: 95 passed, one native Windows symlink
+The original implementation run completed 96 tests: 95 passed, one native Windows symlink
 case skipped for unavailable creation privilege. A real disposable CLI conversation
 ran a synthetic review in turn one, then received only `$brain-save` on turn two
 of the same thread. Its generated proposal preserved reviewer identity, an actual
 failed test result and a proposed/unimplemented fix. No fixture files changed.
 Private transcripts/evidence, machine paths and local settings are outside Git.
+
+On 2026-11-02 the combined source suite ran 162 tests: 161 passed and the same native
+Windows symlink case skipped. A real fresh stdio MCP process recalled two successive
+synthetic publications with unchanged grant bytes. That protocol/source proof alone
+does not establish installed-client or cloud behavior.
+The separately recorded live pilot below adds narrower host evidence.
+
+On 2026-11-02 the approved local installation published one harmless fictional pilot
+note. Exact replay returned NO_CHANGE with zero new saves. Temporarily removing the
+paired publication settings produced the staging-only result; exact active settings
+were restored. A fresh Codex CLI 0.166.0 session discovered brain-recall and executed
+its installed reader, returning the hidden phrase with the correct note ID/line/hash.
+The phrase was absent from that session's prompt and probe project. Two earlier
+isolated attempts were refused before the reader ran; supplying the existing native
+Windows sandbox selection per invocation resolved the probe. Global Codex settings
+were not changed. The exact pilot was subsequently found through the authenticated
+OneDrive website and downloaded. Its 2095 bytes and SHA-256 match the local canonical
+file; the website's active account matches the configured local Personal account.
+That verifies this pilot at that time, not continuous sync; see the release status.
