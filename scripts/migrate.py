@@ -1,5 +1,6 @@
 """Offline intake and disposable draft retrieval. No publisher, network, or AI calls."""
 import argparse
+from copy import deepcopy
 import hashlib
 import json
 import re
@@ -72,15 +73,15 @@ def message_text(item):
     return '\n'.join(x for x in content.get('parts', []) if isinstance(x, str))
 
 
-def normalize(data):
+def normalize(data, source_pointer=''):
     """Accept read_thread captures or a ChatGPT conversations.json export.
 
     Export branch identities are retained. Tool/reasoning items are not treated as
     dialogue evidence. Attachments are locators only; no attachment bytes fetched.
     """
     if isinstance(data, list):
-        for conversation in data:
-            yield from normalize(conversation)
+        for index, conversation in enumerate(data):
+            yield from normalize(conversation, source_pointer + '/' + str(index))
         return
     if 'thread' in data and 'turns' in data:
         t = data['thread']
@@ -114,19 +115,48 @@ def normalize(data):
             ancestry.add(cursor)
             cursor = data['mapping'].get(cursor, {}).get('parent')
         messages = []
+        attachments = []
         for node_id, node in data['mapping'].items():
             m = node.get('message')
             if not m:
                 continue
+            # JSON pointers address archived source bytes, never filesystem targets.
+            escaped = node_id.replace('~', '~0').replace('/', '~1')
+            base = '#' + source_pointer + '/mapping/' + escaped + '/message'
+            content = m.get('content')
+            content_type = content.get('content_type', 'text') if isinstance(content, dict) else 'unknown'
+            parts = content.get('parts', []) if isinstance(content, dict) else []
+            structured = [{'source_locator': base + '/content/parts/' + str(index),
+                           'content_type': part.get('content_type', 'unknown') if isinstance(part, dict) else 'unknown',
+                           'status': 'not-loaded'}
+                          for index, part in enumerate(parts) if not isinstance(part, str)]
+            raw_metadata = m.get('metadata')
+            metadata = raw_metadata if isinstance(raw_metadata, dict) else {}
+            metadata_reference = ({'source_locator': base + '/metadata', 'status': 'not-loaded'}
+                                  if raw_metadata is not None and not isinstance(raw_metadata, dict) else None)
+            supplied = metadata.get('attachments', [])
+            entries = enumerate(supplied) if isinstance(supplied, list) else [(None, supplied)]
+            for index, attachment in entries:
+                attachments.append({'node_id': node_id, 'message_id': m.get('id', node_id),
+                    'source_locator': base + '/metadata/attachments' + ('' if index is None else '/' + str(index)),
+                    'metadata': deepcopy(attachment), 'status': 'not-loaded'})
+            unloaded = bool(structured or supplied or not isinstance(supplied, list)
+                            or metadata_reference or content_type not in ('text', 'code'))
             messages.append({'id': m.get('id', node_id), 'node_id': node_id,
                 'parent': node.get('parent'), 'on_current_branch': node_id in ancestry,
                 'role': m.get('author', {}).get('role', 'unknown'),
                 'date': stamp(m.get('create_time')), 'text': message_text(m),
-                'unavailable': False})
+                'unavailable': False,
+                'structured_parts': structured,
+                'metadata_reference': metadata_reference,
+                'content_reference': {'source_locator': base + '/content',
+                                      'content_type': content_type, 'status': 'not-loaded'} if unloaded else None,
+                'content_coverage': 'text-with-unloaded-content' if unloaded else 'text-only'})
         yield {'id': sid, 'title': data.get('title'), 'origin': 'chatgpt-export',
             'original_date': stamp(data.get('create_time')), 'updated': stamp(data.get('update_time')),
             'link': 'https://chatgpt.com/c/' + sid, 'coverage': 'export-nodes-not-flattened',
-            'messages': messages, 'attachments': [], 'current_node': current}
+            'messages': messages, 'attachments': attachments, 'current_node': current,
+            'source_locator': '#' + source_pointer}
         return
     raise ValueError('Unsupported source format; supply explicit role-labelled capture')
 
@@ -140,11 +170,11 @@ def intake(source, workspace):
     write_new(root / 'archive' / (source_hash + '.json'), original)
     for record in records:
         record['capture_date'] = datetime.now(timezone.utc).isoformat()
-        record['normalization_version'] = '1.1'
+        record['normalization_version'] = '1.2'
         record['source_sha256'] = source_hash
         record['privacy'] = 'personal'
         record['external_processing'] = False
-        target = root / 'normalized' / record['id'] / (source_hash + '.v1_1.json')
+        target = root / 'normalized' / record['id'] / (source_hash + '.v1_2.json')
         if not target.exists():
             write_new(target, json_bytes(record))
     return {'source_sha256': source_hash, 'sessions': len(records), 'published': 0}
@@ -190,10 +220,11 @@ def render(note, workspace, relative):
         raise ValueError('Draft escape')
     # JSON scalar/list encodings are a YAML-compatible subset; no YAML parser here.
     metadata = {k: v for k, v in note.items() if k not in ('claims', 'body')}
+    clean_title = re.sub(r'[\r\n\t\x00-\x1f]', ' ', str(note.get('title', note['id']))).strip()
     lines = ['---', *[f'{key}: {json.dumps(value, ensure_ascii=False)}' for key, value in metadata.items()],
              '---', '', '> [!warning] Candidate only',
              '> Disposable demonstration; no owner content approval or live publication.', '',
-             '# ' + note.get('title', note['id']), '', note.get('body', ''), '', '## Evidence', '']
+             '# ' + (clean_title or note['id']), '', note.get('body', ''), '', '## Evidence', '']
     for i, claim in enumerate(note['claims'], 1):
         lines += [f"{i}. **{claim['evidence']}** — {claim['text']}", f"   Source: {claim['locator']}", '']
     write_new(target, ('\n'.join(lines).rstrip() + '\n').encode('utf-8'))

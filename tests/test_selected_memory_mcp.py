@@ -74,7 +74,7 @@ class SelectedMemoryProtocolTests(unittest.IsolatedAsyncioTestCase):
                                     self.assertEqual(payload['matches'], [])
                                 else:
                                     match = payload['matches'][0]
-                                    self.assertEqual(match['path'], str(note))
+                                    self.assertEqual(match['path'], 'decision.md')
                                     self.assertEqual(match['line'], 7)
                                     self.assertEqual(match['sha256'], hashlib.sha256(note.read_bytes()).hexdigest())
                                     self.assertEqual(match['source_references'], ['synthetic://fixture/rehearsal'])

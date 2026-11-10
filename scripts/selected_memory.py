@@ -86,7 +86,7 @@ def load_selected(manifest_path, manifest_sha256, client):
 
 
 def citation(grant, note, path):
-    return {'note_id': note['id'], 'path': str(path), 'relative_path': note['path'],
+    return {'note_id': note['id'], 'path': note['path'], 'relative_path': note['path'],
             'sha256': note['sha256'], 'source_kind': grant['source_kind'],
             'client': grant['client'], 'source_references': note.get('source_references', []),
             'obsidian_uri': 'obsidian://open?vault=' + quote(Path(grant['root']).name, safe='')
