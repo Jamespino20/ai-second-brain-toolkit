@@ -17,6 +17,17 @@ import json
 import os
 from pathlib import Path
 import re
+
+# Polyfill Path.is_junction for Python 3.11 compatibility
+if not hasattr(Path, "is_junction"):
+    def _is_junction(self: Path) -> bool:
+        try:
+            st = os.lstat(self)
+            tag = getattr(st, "st_reparse_tag", 0)
+            return bool(tag == 0xA0000003 or (tag & 0x20000000))
+        except (OSError, ValueError):
+            return False
+    Path.is_junction = _is_junction  # type: ignore[attr-defined]
 import shutil
 import subprocess
 import sys
