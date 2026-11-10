@@ -28,9 +28,9 @@ If you discover a potential security vulnerability or privacy leak, please do **
 Instead, please report the vulnerability privately through one of the following methods:
 
 1. **GitHub Private Vulnerability Reporting:**  
-   Use the **"Report a vulnerability"** tab on the [Security](https://github.com/Heiron8/ai-second-brain-toolkit/security) page of this repository.
+   Use the **"Report a vulnerability"** tab on the [Security](https://github.com/ahronvincegingco/ai-second-brain-toolkit/security) page of this repository.
 2. **Direct Contact:**  
-   Contact the repository maintainer directly via GitHub ([@Heiron8](https://github.com/Heiron8)).
+   Contact the repository maintainer directly via GitHub ([@ahronvincegingco](https://github.com/ahronvincegingco)).
 
 ### What to Include in Your Report
 - A description of the issue and its potential impact (e.g., path traversal, memory leak, authorization bypass).

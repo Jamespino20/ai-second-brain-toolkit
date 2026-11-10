@@ -20,7 +20,7 @@ Memory enables AI agents to remember your architecture decisions, project milest
 <p align="center">
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-F5A623?style=flat-square&logo=open-source-initiative&logoColor=white" alt="License: MIT" /></a>
-  <a href="https://github.com/Heiron8/ai-second-brain-toolkit/actions"><img src="https://img.shields.io/badge/Tests-454%20Passing-10B981?style=flat-square&logo=github-actions&logoColor=white" alt="Tests" /></a>
+  <a href="https://github.com/ahronvincegingco/ai-second-brain-toolkit/actions"><img src="https://img.shields.io/badge/Tests-454%20Passing-10B981?style=flat-square&logo=github-actions&logoColor=white" alt="Tests" /></a>
   <a href="https://modelcontextprotocol.io/"><img src="https://img.shields.io/badge/Protocol-MCP%202.3-8B5CF6?style=flat-square&logo=anthropic&logoColor=white" alt="MCP" /></a>
   <a href="SECURITY.md"><img src="https://img.shields.io/badge/Privacy-100%25%20Local-6366F1?style=flat-square" alt="Privacy" /></a>
   <img src="https://img.shields.io/badge/Cost-%240%20%2F%20Free-059669?style=flat-square" alt="Cost" />
@@ -54,7 +54,7 @@ Memory enables AI agents to remember your architecture decisions, project milest
 
 ```powershell
 # 1. Clone the repository
-git clone https://github.com/Heiron8/ai-second-brain-toolkit.git
+git clone https://github.com/ahronvincegingco/ai-second-brain-toolkit.git
 cd ai-second-brain-toolkit
 
 # 2. Run the non-destructive installer
@@ -159,6 +159,6 @@ env = { SECOND_BRAIN_MANAGED_GRANT = "C:\\path\\to\\.ai-second-brain-private\\gr
 ## License & Attribution
 
 This toolkit is licensed under the [MIT License](LICENSE).  
-Copyright (c) 2026 Ahron Vince Gingco (Heiron8).
+Copyright (c) 2026 Ahron Vince Gingco.
 
 It incorporates format references from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) (MIT) and design inspiration from [Graphify](https://github.com/Graphify-Labs/graphify) (Apache-2.0 / MIT). See [THIRD_PARTY.md](THIRD_PARTY.md) for full upstream provenance.
