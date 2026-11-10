@@ -52,6 +52,87 @@ class MigrationTests(unittest.TestCase):
         d = {'thread': {'id': 't'}, 'turns': [{'items': [{'type': 'agentMessage', 'text': '::chatgpt-content-reference{index="0"}'}]}]}
         self.assertTrue(list(m.normalize(d))[0]['messages'][0]['unavailable'])
 
+    def test_export_preserves_attachment_metadata_and_structured_source_pointers(self):
+        attachment = {'id': 'file-example', 'name': 'example.pdf', 'extra': {'unknown': True}}
+        part = {'content_type': 'image_asset_pointer', 'asset_pointer': 'file-service://example'}
+        data = [{'id': 'media-session', 'current_node': 'node/~1', 'mapping': {
+            'node/~1': {'parent': None, 'message': {'id': 'message-1',
+                'author': {'role': 'user'}, 'create_time': None,
+                'content': {'content_type': 'multimodal_text', 'parts': ['Question', part]},
+                'metadata': {'attachments': [attachment, {}]}}}}}]
+        original = json.dumps(data, sort_keys=True)
+        result = list(m.normalize(data))[0]
+        message = result['messages'][0]
+        self.assertEqual(message['text'], 'Question')
+        self.assertEqual(message['structured_parts'], [{
+            'source_locator': '#/0/mapping/node~1~01/message/content/parts/1',
+            'content_type': 'image_asset_pointer', 'status': 'not-loaded'}])
+        self.assertEqual(result['source_locator'], '#/0')
+        self.assertEqual(result['attachments'][0]['metadata'], attachment)
+        self.assertEqual(result['attachments'][0]['node_id'], 'node/~1')
+        self.assertEqual(result['attachments'][0]['source_locator'],
+                         '#/0/mapping/node~1~01/message/metadata/attachments/0')
+        self.assertTrue(all(x['status'] == 'not-loaded' for x in result['attachments']))
+        self.assertEqual(result['attachments'][1]['metadata'], {})
+        self.assertEqual(message['content_coverage'], 'text-with-unloaded-content')
+        self.assertIsNone(message['date'])
+        self.assertTrue(message['on_current_branch'])
+        self.assertEqual(json.dumps(data, sort_keys=True), original)
+
+    def test_export_unknown_nontext_content_is_explicitly_unloaded(self):
+        data = {'id': 'unknown-media', 'mapping': {'a': {'parent': None, 'message': {
+            'author': {'role': 'assistant'}, 'content': {'content_type': 'future-format'},
+            'metadata': None}}}, 'current_node': 'a'}
+        message = list(m.normalize(data))[0]['messages'][0]
+        self.assertEqual(message['text'], '')
+        self.assertEqual(message['content_reference'], {
+            'source_locator': '#/mapping/a/message/content',
+            'content_type': 'future-format', 'status': 'not-loaded'})
+        self.assertEqual(message['content_coverage'], 'text-with-unloaded-content')
+
+    def test_export_preserves_supported_list_content(self):
+        data = {'id': 'list-content', 'mapping': {'a': {'message': {
+            'content': [{'text': 'Question'}, {'unknown': True}]}}}}
+        message = list(m.normalize(data))[0]['messages'][0]
+        self.assertEqual(message['text'], 'Question\n')
+        self.assertEqual(message['content_reference']['source_locator'], '#/mapping/a/message/content')
+        self.assertEqual(message['content_reference']['status'], 'not-loaded')
+
+    def test_export_unknown_metadata_shape_remains_source_referenced(self):
+        data = {'id': 'list-metadata', 'mapping': {'a': {'message': {
+            'content': {'parts': ['Question']}, 'metadata': ['unknown']}}}}
+        message = list(m.normalize(data))[0]['messages'][0]
+        self.assertEqual(message['text'], 'Question')
+        self.assertEqual(message['metadata_reference'], {
+            'source_locator': '#/mapping/a/message/metadata', 'status': 'not-loaded'})
+
+    def test_export_empty_single_attachment_metadata_is_not_dropped(self):
+        data = {'id': 'empty-attachment', 'mapping': {'a': {'message': {
+            'content': {'parts': ['Question']}, 'metadata': {'attachments': {}}}}}}
+        result = list(m.normalize(data))[0]
+        self.assertEqual(len(result['attachments']), 1)
+        self.assertEqual(result['attachments'][0]['metadata'], {})
+        self.assertEqual(result['attachments'][0]['source_locator'], '#/mapping/a/message/metadata/attachments')
+        self.assertEqual(result['messages'][0]['content_coverage'], 'text-with-unloaded-content')
+
+    def test_new_normalization_version_preserves_old_record_and_exact_source(self):
+        source = self.root / 'source.json'
+        raw = json.dumps({'id': 'versioned', 'mapping': {}}).encode()
+        source.write_bytes(raw)
+        sha = m.digest(raw)
+        old = self.root / 'normalized' / 'versioned' / (sha + '.v1_1.json')
+        old.parent.mkdir(parents=True)
+        old.write_bytes(b'legacy-record-bytes')
+        m.intake(source, self.root)
+        target = old.with_name(sha + '.v1_2.json')
+        self.assertTrue(target.exists())
+        self.assertEqual(json.loads(target.read_bytes())['normalization_version'], '1.2')
+        self.assertEqual(old.read_bytes(), b'legacy-record-bytes')
+        self.assertEqual((self.root / 'archive' / (sha + '.json')).read_bytes(), raw)
+        before = target.read_bytes()
+        m.intake(source, self.root)
+        self.assertEqual(target.read_bytes(), before)
+
     def test_truncation_marker_preserved(self):
         d = {'thread': {'id': 't'}, 'turns': [{'items': [{'type': 'agentMessage', 'text': 'Partial answer', 'truncated': True}]}]}
         self.assertTrue(list(m.normalize(d))[0]['messages'][0]['truncated'])

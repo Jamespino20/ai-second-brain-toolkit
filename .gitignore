@@ -27,6 +27,16 @@ publications/
 evidence/
 context-packets/
 vault/
+# Only these synthetic instruction templates belong in Git.
+!templates/vault/
+templates/vault/*
+!templates/vault/AGENTS.md
+!templates/vault/CLAUDE.md
+!templates/vault/index.md
+!templates/vault/log.md
+!templates/vault/system/
+templates/vault/system/*
+!templates/vault/system/brain.md
 vaults/
 AI-Second-Brain/
 .obsidian/

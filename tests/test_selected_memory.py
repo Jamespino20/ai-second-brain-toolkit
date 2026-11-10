@@ -95,7 +95,7 @@ class SelectedMemoryTests(unittest.TestCase):
         self.grant['source_kind'] = 'canonical'
         self.grant['owner_authorization']['personal_content_external_model_approved'] = True
         self.pin = self.repin()
-        self.assertEqual(self.search()['matches'][0]['path'], str(self.path))
+        self.assertEqual(self.search()['matches'][0]['path'], self.grant['notes'][0]['path'])
 
     def test_personal_material_cannot_be_labeled_synthetic(self):
         self.path.write_bytes(self.path.read_bytes().replace(b'"synthetic"', b'"personal"'))

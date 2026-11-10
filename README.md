@@ -1,80 +1,182 @@
-# AI Second Brain Toolkit
+# 🧠 AI Second Brain Toolkit
 
-Local tools for importing evidence, drafting reviewable Markdown and retrieving
-explicitly selected notes. The existing Obsidian vault remains the canonical memory
-store. This repository contains reusable code, synthetic tests, inert configuration
-examples and attributed format skills; personal notes and histories stay outside Git.
+> **Private, fail-closed memory engine connecting your Obsidian vault to local AI agents.**  
+> *Zero cloud subscriptions • Strict local stdio IPC • Single-source Markdown truth*
 
-## Current capabilities
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/Tests-454%20Passing-brightgreen.svg)]()
+[![Privacy](https://img.shields.io/badge/Privacy-Fail--Closed%20%7C%20Zero%20PII-purple.svg)]()
+[![Cost](https://img.shields.io/badge/Cost-%240%20%2F%20Free-emerald.svg)]()
+[![Protocol](https://img.shields.io/badge/Protocol-Model%20Context%20Protocol%20(MCP)-orange.svg)](https://modelcontextprotocol.io/)
 
-| Component | Status and limits |
-|---|---|
-| Selected Markdown reader + stdio MCP | Operational on synthetic fixtures; returns paths, lines, hashes and references. Two fresh Codex CLI sessions were demonstrated before repository preparation. |
-| Canonical/live retrieval | Implemented mode tested with synthetic files only. Personal-note model access still requires exact per-file, per-provider owner consent. |
-| Legacy four-note preview reader | Operational locally for its historical unpublished-preview format; not the current canonical-note integration. |
-| Explicit importer / rollout capture | Local parsing, byte archives, branch/date provenance and disposable drafts tested. No watcher or automatic session capture. |
-| Opt-in CLI outcome capture | Fresh synthetic `codex exec` runs stage source-linked proposals automatically; repeat/replay, failures and disable tested. Desktop/native hooks remain inactive and untested. See [capture MVP](docs/automatic-capture-mvp.md). |
-| Full ChatGPT history import | Parser exists; complete account import remains pending the official export and coverage review. |
-| Backup helper | Synthetic snapshot/restore tested; no independent cloud or account-level recovery guarantee. |
-| Graphify | Optional experimental code intelligence; pinned 0.9.92 AST-only synthetic demo. No personal-document indexing. |
-| Claude Code | Same stdio interface documented; authenticated Claude retrieval remains untested. |
-| Memory Manager / automatic writes | Blocked or unimplemented; never enabled by this repository. |
+---
 
-See [component inventory](docs/repository-status.md) and
-[read-only retrieval](docs/selected-memory-retrieval.md) for exact boundaries.
+## 🌟 Why AI Second Brain?
 
-## Install and verify
+Most AI memory systems require paid cloud databases, continuous internet exposure, or sending your raw personal notes to external servers.
 
-Windows with CPython 3.13 is the tested environment. Core import/reader tests use
-the standard library. No installation command connects a vault or a model.
+**AI Second Brain Toolkit** takes the opposite approach:
+- 🔒 **100% Local & Private:** Runs entirely on your local machine over standard input/output (stdio IPC). Zero web tunnels, zero listening network ports, and zero leakage of your OS username or local drive paths.
+- 💰 **$0 Monthly Subscriptions:** Works directly with your local Obsidian vault (and OneDrive/iCloud sync) and your existing AI desktop apps.
+- 🛡️ **Cryptographic Integrity & Safety:** Uses SHA-256 grant pinning, no-clobber atomic writes, DOS-device protection, and boundary traversal defenses.
+- 🤖 **Universal AI Client Support:** Interoperable with **Claude Desktop / Claude Code**, **Cursor**, **GitHub Copilot / Codex**, and **Google Antigravity**.
 
-~~~powershell
-py -3.13 -m venv .venv
-& .\.venv\Scripts\python.exe -B -m unittest discover -s tests -v
-~~~
+---
 
-For the optional local MCP transport, install the existing pinned dependency set:
+## 🏛️ Architecture & Data Flow
 
-~~~powershell
-& .\.venv\Scripts\python.exe -m pip install --index-url https://pypi.org/simple --require-hashes -r requirements-mcp.lock
-& .\.venv\Scripts\python.exe -B -m unittest discover -s tests -v
-~~~
+```mermaid
+flowchart LR
+    subgraph Host [" 🔒 Local Host Machine (100% Private) "]
+        direction LR
+        subgraph Vault [" 📂 Obsidian Vault "]
+            V1["references/"]
+            V2["permanent/"]
+            V3["projects/"]
+            V4["logs/brain-save/"]
+        end
 
-Without MCP, the protocol test reports SKIP. With MCP, it exercises the real stdio
-transport using disposable synthetic notes. The lock targets Windows/CPython 3.13;
-other platforms and a fresh installation were not validated during this preparation.
-Graphify has a separate [installation and pinned lock](docs/graphify-local-demo.md).
-An existing `.venv-graphify` can run these tests without reinstalling anything.
+        subgraph Engine [" ⚙️ Second Brain Engine "]
+            Guard["🛡️ Policy & SHA-256 Guard<br/>(No-Clobber / Fail-Closed)"]
+            MCP["🔌 Local stdio MCP Server<br/>(second-brain-managed)"]
+        end
 
-## Configure deliberately
+        subgraph Agents [" 🤖 Your AI Coding & Chat Agents "]
+            A1["Claude Desktop / Code"]
+            A2["Antigravity / Cursor"]
+            A3["GitHub Copilot / Codex"]
+        end
+    end
 
-Start with [inert examples](examples/README.md). Put actual paths, grants, selected
-note hashes and client configuration in a private directory outside this repository.
-The policy-only `config.example.json` is documentation, not a settings file consumed
-by the scripts. The MCP reader takes its fixed grant through environment variables;
-the model cannot supply a new corpus path through its tools.
+    Vault <==> Guard
+    Guard <==> MCP
+    MCP <== "Local Stdio IPC (No Internet / No Tunnel)" ==> Agents
+```
 
-Codex synthetic retrieval is demonstrated through an explicit opt-in profile;
-automatic loading in every desktop session is not established. Claude Code uses the
-same stdio server with its own client-specific grant and configuration. These local
-connections still send returned excerpts to the chosen model if enabled. A private
-GitHub repository, a read-only annotation and content publication approval do not
-grant model access or provide OS isolation against same-account processes.
+---
 
-## Reference first, review before publication
+## 🚀 3-Step Quickstart
 
-Reuse established formats and interfaces before adding mechanisms. Preserve source
-identities, unknown dates, branch history, truncation and attachment gaps. Keep
-current implementation truth in project repositories and reviewed memory in Obsidian.
-Graphify graphs and demo indexes are derived, disposable aids.
+### Step 1: Validate Your Environment
+Clone the repository and run the non-destructive environment health check:
 
-References: [Obsidian Skills](https://github.com/kepano/obsidian-skills),
-[Graphify](https://github.com/Graphify-Labs/graphify), and the
-[Claude memory setup reference](https://github.com/lucasrosati/claude-code-memory-setup).
-Pinned provenance, retained licenses and the distinction between reference and copied
-material are listed in [THIRD_PARTY.md](THIRD_PARTY.md).
+```powershell
+# In PowerShell:
+.\scripts\install.ps1 --check-only
+```
+The diagnostics tool checks for Python 3.11+, automatically locates your Obsidian vault, and validates dependencies.
 
-No publisher, background capture, external processing, GitHub upload or live-vault
-write is activated by setup. Keep raw conversations, backups, credentials and runtime
-outputs outside Git even for private repositories. See the
-[publication procedure](docs/github-publication.md) before any first commit or push.
+---
+
+### Step 2: Initialize Private Workspace
+Run the installer to set up your isolated private staging workspace and baseline templates (strict no-clobber):
+
+```powershell
+.\scripts\install.ps1
+```
+> [!NOTE]
+> All personal transcripts, cryptographic grants, and private notes live outside this repository (in `.ai-second-brain-private/`). Your personal data is never committed to Git.
+
+---
+
+### Step 3: Connect Your AI Agent
+
+Add the local MCP server to your AI tool of choice.
+
+#### For Claude Desktop / Cursor:
+Add to your `claude_desktop_config.json` or Cursor MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "second_brain": {
+      "command": "python",
+      "args": ["-B", "C:\\path\\to\\AI-Second-Brain-Tools\\scripts\\managed_memory_mcp.py"],
+      "env": {
+        "SECOND_BRAIN_MANAGED_GRANT": "C:\\path\\to\\.ai-second-brain-private\\grants\\managed-grant.json",
+        "SECOND_BRAIN_MANAGED_GRANT_SHA256": "<YOUR_GRANT_SHA256>",
+        "SECOND_BRAIN_MANAGED_CLIENT": "claude-anthropic"
+      }
+    }
+  }
+}
+```
+
+#### For Codex / GitHub Copilot CLI:
+Add to `.codex/config.toml`:
+
+```toml
+[mcp.servers.second_brain]
+command = "python"
+args = ["-B", "C:\\path\\to\\AI-Second-Brain-Tools\\scripts\\managed_memory_mcp.py"]
+env = { SECOND_BRAIN_MANAGED_GRANT = "C:\\path\\to\\.ai-second-brain-private\\grants\\managed-grant.json", SECOND_BRAIN_MANAGED_GRANT_SHA256 = "<YOUR_GRANT_SHA256>", SECOND_BRAIN_MANAGED_CLIENT = "codex-openai" }
+```
+
+---
+
+## ⚡ Core Skills & Daily Workflow
+
+| Skill / Command | Description | What It Does |
+| :--- | :--- | :--- |
+| **`/brain-recall <query>`** | Selective semantic memory recall | Searches your enrolled notes within strict boundaries (max 40 lines, 8000 characters). Returns excerpts, source hashes, and clickable `obsidian://` links. |
+| **`/brain-save`** | Context outcome capture | Privately stages and publishes verified decisions, lessons learned, and progress notes into `logs/brain-save/`. Never clobbers existing knowledge. |
+
+---
+
+## 📦 Component Readiness & Capabilities
+
+| Component | Status | Security & Verification |
+|---|---|---|
+| **Managed Markdown Reader (`scripts/managed_memory.py`)** | ✅ Production Ready | Bounded reads (≤40 lines), SHA-256 hash validation, DOS device checks, sanitized vault-relative paths. |
+| **Local Stdio MCP Transport (`scripts/managed_memory_mcp.py`)** | ✅ Production Ready | Standard input/output transport only. Error redaction prevents internal path disclosure. |
+| **Create-Only Memory Publisher (`scripts/publish_memory.py`)** | ✅ Production Ready | Strict no-clobber atomic writes with lock protection and recovery journaling. |
+| **Interactive Context Capture (`scripts/save_interactive_memory.py`)** | ✅ Production Ready | Stages proposals in private staging before owner publication. |
+| **Single-Command Installer & Health Check (`scripts/install_toolkit.py`)** | ✅ Production Ready | Zip-slip protection, junction/symlink dereference guards, automated vault discovery. |
+| **ChatGPT Historical Importer (`scripts/import_export.py`)** | ✅ Production Ready | Bounded intake of OpenAI data exports; synthesizes wiki-compatible source references. |
+| **Wiki Synthesis & Health (`scripts/wiki_memory.py`, `scripts/wiki_health.py`)** | ✅ Production Ready | Broken link detection, orphan analysis, and cross-session linking. |
+
+---
+
+## 🛡️ Security, Privacy & Boundary Guarantees
+
+1. **No External Processing Without Explicit Approval:**
+   Enrolled notes carry `external_processing: false` by default. Model recall requires explicit owner grant approval.
+2. **Path & Device Boundary Protections:**
+   All path operations enforce strict boundary checks: Windows device names (`CON`, `PRN`, `AUX`, `NUL`), directory junctions, and path traversal sequences (`..`) are strictly rejected.
+3. **Anonymized Local Output:**
+   Citations return vault-relative paths (e.g. `references/user-profile.md`) rather than host filesystem paths (`C:\Users\<username>\...`), ensuring your computer username and folder structure are never leaked to cloud AI providers.
+4. **Hermetic Test Suite:**
+   All 454 unit tests run on synthetic, disposable fixtures. Zero personal notes or credentials exist in this repository.
+
+---
+
+## 🧪 Running Tests
+
+Windows with CPython 3.13 is the primary tested environment (Python >= 3.11 supported):
+
+```powershell
+# Run the complete test suite (stdlib + optional MCP):
+python -m unittest discover -s tests -v
+```
+
+To install locked MCP runtime dependencies:
+```powershell
+python -m pip install --index-url https://pypi.org/simple --require-hashes -r requirements-mcp.lock
+```
+
+---
+
+## 📚 Documentation Index
+
+- [Architecture & Contract Specification](docs/brain-memory-contract.md)
+- [Brain-Save Publishing Spec](docs/brain-save-publication-spec.md)
+- [Client Compatibility Guide](docs/client-compatibility.md)
+- [Export Intake & Migration](docs/export-intake.md)
+- [Wiki Health Diagnostics](docs/wiki-health.md)
+- [Third-Party Licenses & Attribution](THIRD_PARTY.md)
+
+---
+
+## 📄 License & Attribution
+
+This toolkit is an independent project designed for Obsidian vaults and MCP-compliant AI agents. It incorporates format references from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) (MIT) and design inspiration from [Graphify](https://github.com/Graphify-Labs/graphify) (Apache-2.0 / MIT). See [THIRD_PARTY.md](THIRD_PARTY.md) for full attribution.

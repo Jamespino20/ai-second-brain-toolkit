@@ -1,6 +1,7 @@
 import copy
 from concurrent.futures import ThreadPoolExecutor
 import json
+import io
 import os
 from pathlib import Path
 import subprocess
@@ -169,6 +170,101 @@ class InteractiveMemoryTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertNotIn(b'fixture-only-secret', result.stderr)
         self.assertEqual(json.loads(result.stderr)['status'], 'REFUSED')
+
+
+class PublicationAdapterTests(unittest.TestCase):
+    def setUp(self):
+        import test_publish_memory as fixtures
+        self.fixture = fixtures.PublicationTests()
+        self.fixture.setUp()
+        self.addCleanup(self.fixture.doCleanups)
+
+    def cli(self, flags=None):
+        fixture = self.fixture
+        adapter = Path(__file__).resolve().parents[1] / 'scripts/save_interactive_memory.py'
+        env = {**os.environ, 'CODEX_THREAD_ID': 'synthetic-publication'}
+        return subprocess.run([sys.executable, '-B', str(adapter), '--root', str(fixture.root), *(flags or [])],
+                              input=json.dumps(fixture.packet).encode(), capture_output=True,
+                              cwd=fixture.project, env=env)
+
+    def flags(self):
+        return ['--policy', str(self.fixture.policy_path), '--policy-sha256', self.fixture.pin]
+
+    def test_without_policy_preserves_exact_legacy_stage_output(self):
+        fixture = self.fixture
+        expected = stage(fixture.root, fixture.project, fixture.packet, {'CODEX_THREAD_ID': 'synthetic-publication'})
+        process = self.cli()
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(json.loads(process.stdout), expected)
+        self.assertEqual(list(fixture.vault.rglob('*.md')), [])
+
+    def test_single_invocation_publishes_and_repeat_retains_stage_receipt(self):
+        fixture = self.fixture
+        process = self.cli(self.flags())
+        self.assertEqual(process.returncode, 0, process.stderr)
+        value = json.loads(process.stdout)
+        self.assertEqual(value['source_sha256'], fixture.receipt['source_sha256'])
+        self.assertEqual(value['publication']['status'], 'SAVED')
+        self.assertEqual(value['publication']['counts']['saved'], 1)
+        self.assertEqual(value['status'], 'DUPLICATE_SOURCE')
+        again = self.cli(self.flags())
+        self.assertEqual(again.returncode, 0)
+        self.assertEqual(json.loads(again.stdout)['publication']['status'], 'NO_CHANGE')
+
+    def test_disabled_and_refused_publication_preserve_actual_staging(self):
+        fixture = self.fixture
+        fixture.policy['enabled'] = False
+        fixture.pin_policy()
+        process = self.cli(self.flags())
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(json.loads(process.stdout)['publication']['status'], 'DISABLED')
+        flags = ['--policy', str(fixture.root / 'PRIVATE_PATH_CANARY.json'), '--policy-sha256', '0' * 64]
+        process = self.cli(flags)
+        self.assertEqual(process.returncode, 2)
+        value = json.loads(process.stdout)
+        self.assertEqual(value['status'], 'DUPLICATE_SOURCE')
+        self.assertEqual(value['source_sha256'], fixture.receipt['source_sha256'])
+        self.assertIn(value['publication']['status'], ('REFUSED', 'PARTIAL'))
+        self.assertNotIn(b'PRIVATE_PATH_CANARY', process.stdout + process.stderr)
+
+    def test_publication_conflict_keeps_staged_receipt_and_nonzero_exit(self):
+        fixture = self.fixture
+        self.assertEqual(self.cli(self.flags()).returncode, 0)
+        target = next(fixture.vault.rglob('*.md'))
+        target.write_bytes(b'SYNTHETIC_OWNER_EDIT')
+        process = self.cli(self.flags())
+        self.assertEqual(process.returncode, 2)
+        value = json.loads(process.stdout)
+        self.assertEqual(value['publication']['status'], 'QUARANTINED')
+        self.assertEqual(value['source_sha256'], fixture.receipt['source_sha256'])
+        self.assertEqual(target.read_bytes(), b'SYNTHETIC_OWNER_EDIT')
+
+    def test_paired_host_flags_required(self):
+        for flags in [['--policy', str(self.fixture.policy_path)], ['--policy-sha256', self.fixture.pin]]:
+            with self.subTest(flags=flags):
+                process = self.cli(flags)
+                self.assertEqual(process.returncode, 2)
+                self.assertEqual(list(self.fixture.vault.rglob('*.md')), [])
+
+    def test_partial_and_busy_keep_staging_and_uncertain_exception_is_redacted(self):
+        import save_interactive_memory as adapter
+        import publish_memory as publisher
+        from types import SimpleNamespace
+        for status in ['PARTIAL', 'BUSY', 'REFUSED', 'OS_ERROR']:
+            output = io.StringIO()
+            stdin = SimpleNamespace(buffer=io.BytesIO(json.dumps(self.fixture.packet).encode()))
+            options = {'side_effect': OSError('PRIVATE_EXCEPTION_CANARY')} if status == 'OS_ERROR' else {
+                'return_value': publisher.result(status, 'synthetic-transaction', saved=int(status == 'PARTIAL'))}
+            with self.subTest(status=status), patch.object(sys, 'argv', ['adapter', '--root', str(self.fixture.root), *self.flags()]), \
+                 patch.object(sys, 'stdin', stdin), patch.object(sys, 'stdout', output), \
+                 patch.object(Path, 'cwd', return_value=self.fixture.project), \
+                 patch.dict(os.environ, {'CODEX_THREAD_ID': 'synthetic-publication'}), \
+                 patch.object(publisher, 'publish_staged', **options):
+                self.assertEqual(adapter.main(), 2)
+                value = json.loads(output.getvalue())
+                self.assertEqual(value['source_sha256'], self.fixture.receipt['source_sha256'])
+                self.assertEqual(value['publication']['status'], 'PARTIAL' if status == 'OS_ERROR' else status)
+                self.assertNotIn('PRIVATE_EXCEPTION_CANARY', output.getvalue())
 
 
 if __name__ == '__main__':

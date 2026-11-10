@@ -1,0 +1,27 @@
+{
+  "schema": "brain-publication-policy-v1",
+  "policy_id": "inert-example",
+  "enabled": false,
+  "vault_root": "<absolute-owner-approved-vault-root>",
+  "owner_authorization": {
+    "state": "pending",
+    "reference": null
+  },
+  "write_scope": {
+    "create_prefixes": ["logs/brain-save/", "projects/", "permanent/engineering/"],
+    "updates": [],
+    "bootstrap": []
+  },
+  "local_read_scope": {
+    "prefixes": [],
+    "notes": []
+  },
+  "model_output": {
+    "paths": false,
+    "titles": false
+  },
+  "limits": {
+    "max_managed_notes": 256,
+    "max_note_bytes": 128000
+  }
+}
