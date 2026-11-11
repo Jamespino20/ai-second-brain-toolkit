@@ -524,7 +524,7 @@ def main(argv=None):
             try:
                 app.state.owner_cleanup()
             except Exception:
-                return 1
+                pass
 
 
 if __name__ == '__main__':
