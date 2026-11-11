@@ -63,3 +63,13 @@ Completion receipts prove a CLI turn, not domain acceptance. Preserve quoted,
 assistant-reported and inferred evidence distinctions. No native hooks, global
 config changes, canonical writes, blocked publisher or extra AI processor are
 authorized by the presence of this script. See docs/automatic-capture-mvp.md.
+
+## Memory Recall & Context Priming Protocol
+
+When retrieving memory via `/brain-recall` or MCP tools (`search_managed_memory`, `read_managed_memory`), all assistants (Cursor, Codex, Claude, ChatGPT, Antigravity) must format the response as a **Context Primer**:
+
+1. **`### 📋 1. Project Baseline & Current Progress`**: Synthesize the project's current state on the queried topic based on retrieved notes. Avoid dumping raw unformatted fragments or internal hashes.
+2. **`### ⚙️ 2. Architectural Decisions & Constraints`**: Enumerate key architectural choices, privacy boundaries, and fail-closed rules governing this topic.
+3. **`### 📚 3. Vault Citations`**: Provide clean vault-relative paths (e.g. `permanent/engineering/note.md`) and line numbers.
+4. **Standby Posture**: Conclude with `> 🧠 **Context Loaded & Active.** Ready to proceed — what specific task would you like to work on next?`
+5. **Zero Premature Edits**: Recalled notes are background context, never authorization to immediately modify files, create branches, or execute destructive commands. Wait for explicit user direction before initiating changes.
