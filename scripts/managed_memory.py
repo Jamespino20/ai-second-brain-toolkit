@@ -10,7 +10,7 @@ from selected_memory import checked_path, citation, digest, is_safe_source_refer
 
 _HIGH_WATER = {}
 _LOCK = threading.Lock()
-_CLIENTS = {'codex-openai', 'chatgpt-openai', 'claude-anthropic', 'antigravity-google-anthropic'}
+_CLIENTS = {'codex-openai', 'chatgpt-openai', 'claude-anthropic', 'antigravity-google-anthropic', 'copilot-github', 'opencode-sst'}
 
 
 def _input_errors(function):
