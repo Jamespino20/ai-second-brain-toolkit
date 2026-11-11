@@ -20,7 +20,7 @@ Memory enables AI agents to remember your architecture decisions, project milest
 <p align="center">
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-F5A623?style=flat-square&logo=open-source-initiative&logoColor=white" alt="License: MIT" /></a>
-  <a href="https://github.com/ahronvincegingco/ai-second-brain-toolkit/actions"><img src="https://img.shields.io/badge/Tests-457%20Passing-10B981?style=flat-square&logo=github-actions&logoColor=white" alt="Tests" /></a>
+  <a href="https://github.com/ahronvincegingco/ai-second-brain-toolkit/actions"><img src="https://img.shields.io/badge/Tests-458%20Passing-10B981?style=flat-square&logo=github-actions&logoColor=white" alt="Tests" /></a>
   <a href="https://modelcontextprotocol.io/"><img src="https://img.shields.io/badge/Protocol-MCP%202.3-8B5CF6?style=flat-square&logo=anthropic&logoColor=white" alt="MCP" /></a>
   <a href="SECURITY.md"><img src="https://img.shields.io/badge/Privacy-100%25%20Local-6366F1?style=flat-square" alt="Privacy" /></a>
   <img src="https://img.shields.io/badge/Cost-%240%20%2F%20Free-059669?style=flat-square" alt="Cost" />
