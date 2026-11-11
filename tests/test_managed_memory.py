@@ -122,6 +122,16 @@ class ManagedMemoryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             reader.search_managed(*self.args[:2], 'claude-anthropic', 'amber')
 
+    def test_coding_agent_clients_accepted(self):
+        for client in ['copilot-github', 'opencode-sst']:
+            with self.subTest(client=client):
+                self.grant['client'] = client
+                self.pin()
+                self.args = (str(self.grant_path), digest(self.grant_path.read_bytes()), client)
+                self.assertEqual(len(reader.search_managed(*self.args, 'amber')['matches']), 1)
+        with self.assertRaises(ValueError):
+            reader.search_managed(*self.args[:2], 'unknown-client', 'amber')
+
     def test_canonical_requires_separate_consent(self):
         self.grant['source_kind'] = 'canonical'
         self.note.write_bytes(self.note.read_bytes().replace(b'synthetic', b'personal'))

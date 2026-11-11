@@ -122,7 +122,7 @@ Add to your `.gemini/antigravity-cli/mcp/second_brain.json`:
   "env": {
     "SECOND_BRAIN_MANAGED_GRANT": "C:\\path\\to\\.ai-second-brain-private\\grants\\managed-grant.json",
     "SECOND_BRAIN_MANAGED_GRANT_SHA256": "<YOUR_GRANT_SHA256>",
-    "SECOND_BRAIN_MANAGED_CLIENT": "antigravity-google"
+    "SECOND_BRAIN_MANAGED_CLIENT": "antigravity-google-anthropic"
   }
 }
 ```
@@ -139,6 +139,53 @@ command = "python"
 args = ["-B", "C:\\path\\to\\AI-Second-Brain-Tools\\scripts\\managed_memory_mcp.py"]
 env = { SECOND_BRAIN_MANAGED_GRANT = "C:\\path\\to\\.ai-second-brain-private\\grants\\managed-grant.json", SECOND_BRAIN_MANAGED_GRANT_SHA256 = "<YOUR_GRANT_SHA256>", SECOND_BRAIN_MANAGED_CLIENT = "codex-openai" }
 ```
+</details>
+
+<details>
+<summary><b>OpenCode</b></summary>
+
+Add to your `opencode.jsonc`:
+
+```json
+{
+  "mcp": {
+    "second_brain": {
+      "type": "stdio",
+      "command": ["python", "-B", "C:\\path\\to\\AI-Second-Brain-Tools\\scripts\\managed_memory_mcp.py"],
+      "env": {
+        "SECOND_BRAIN_MANAGED_GRANT": "C:\\path\\to\\.ai-second-brain-private\\grants\\managed-grant.json",
+        "SECOND_BRAIN_MANAGED_GRANT_SHA256": "<YOUR_GRANT_SHA256>",
+        "SECOND_BRAIN_MANAGED_CLIENT": "opencode-sst"
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>VS Code — GitHub Copilot Chat</b></summary>
+
+VS Code MCP servers (usable from Copilot Chat) are configured in VS Code settings (`mcp.servers`). Minimal shape:
+
+```json
+{
+  "mcp.servers": {
+    "second_brain": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-B", "C:\\path\\to\\AI-Second-Brain-Tools\\scripts\\managed_memory_mcp.py"],
+      "env": {
+        "SECOND_BRAIN_MANAGED_GRANT": "C:\\path\\to\\.ai-second-brain-private\\grants\\managed-grant.json",
+        "SECOND_BRAIN_MANAGED_GRANT_SHA256": "<YOUR_GRANT_SHA256>",
+        "SECOND_BRAIN_MANAGED_CLIENT": "copilot-github"
+      }
+    }
+  }
+}
+```
+
+The grant itself is per-platform and owner-issued — the client string must match the grant's `client` field exactly, or every call refuses closed.
 </details>
 
 ---

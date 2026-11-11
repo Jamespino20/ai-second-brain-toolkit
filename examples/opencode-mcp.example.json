@@ -1,0 +1,15 @@
+{
+  "mcp": {
+    "second_brain": {
+      "type": "stdio",
+      "command": ["python", "-B", "OWNER_CONFIG_ONLY/scripts/managed_memory_mcp.py"],
+      "env": {
+        "SECOND_BRAIN_MANAGED_GRANT": "OWNER_CONFIG_ONLY/managed-grant.json",
+        "SECOND_BRAIN_MANAGED_GRANT_SHA256": "REPLACE_WITH_REVIEWED_GRANT_SHA256",
+        "SECOND_BRAIN_MANAGED_CLIENT": "opencode-sst",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  }
+}
